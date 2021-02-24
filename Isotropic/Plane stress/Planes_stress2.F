@@ -1,4 +1,4 @@
-      subroutine usermat(
+       subroutine usermat(
      &                   matId, elemId,kDomIntPt, kLayer, kSectPt,
      &                   ldstep,isubst,keycut,
      &                   nDirect,nShear,ncomp,nStatev,nProp,
@@ -28,7 +28,7 @@
      &                 tsstif  (2) 
 	
 	
-      EXTERNAL         usermat3d
+      EXTERNAL         usermatps
       EXTERNAL         myuserfunc
       integer :: myvar
 	
@@ -51,10 +51,10 @@ c
 	
 	
 
-	if (ncomp >= 4) then
+	if (nDirect.eq. 2 .and. ncomp .EQ. 3) then
 	
 		
-		call usermat3d (
+		call usermatps (
      &                   matId, elemId,kDomIntPt, kLayer, kSectPt,
      &                   ldstep,isubst,keycut,
      &                   nDirect,nShear,ncomp,nStatev,nProp,
@@ -73,7 +73,7 @@ c
 	
 	
 **************    Subroutine for 3d elements (Linear elastic isotropic model)   ********************
-      subroutine usermat3d(
+      subroutine usermatps(
      &                   matId, elemId,kDomIntPt, kLayer, kSectPt,
      &                   ldstep,isubst,keycut,
      &                   nDirect,nShear,ncomp,nStatev,nProp,
@@ -103,7 +103,7 @@ c
      &                 defGrad (3,3),     defGrad_t(3,3),  
      &                 tsstif  (2)
 	
-	
+********* USER DEFINED VARIABLES (FOR CALCULATION PURPOSE) **********	
 	
       integer :: mcomp
       DOUBLE PRECISION    HALF, ONE, TWO, ZERO
@@ -112,28 +112,24 @@ c
      &                 HALF       = 0.5d0,
      &                 ONE        = 1.d0,
      &                 TWO        = 2.d0,
-     &                 mcomp      = 6
+     &                 mcomp      = 3
      &                 )
 	
-	
-
-********* USER DEFINED VARIABLES (FOR CALCULATION PURPOSE) **********	
-
-
-      DOUBLE PRECISION  dsdeEl(mcomp,mcomp)
-
+      EXTERNAL         vzero, vmove, get_ElmData
+      DOUBLE PRECISION  dsdeEl(mcomp,mcomp), sigma(mcomp),
+     &                  sigi (mcomp)
       
 	DOUBLE PRECISION    var0, var1, var2, var3, var4, var5,
      &                    var6, var7, var8
 	
 	
       INTEGER             i, j
-      DOUBLE PRECISION    sigy0, twoG, young_x, young_y, 
-     &                    young_z, pr_xy, pr_yz, pr_xz, 
-     &                    g_xy, g_yz, g_xz, delta,
-     &                    pr_yx, pr_zy, pr_zx,
-     &                    xy_yx, yz_zy, zx_xz,
-     &                    xyz, E_xyz
+      DOUBLE PRECISION    young, posn, mu,  
+     &                    twoG, lambda, c1,
+     &                    c2, c3
+	
+	
+	
 	
       integer :: iott,wrinqr
       external wrinqr
@@ -146,99 +142,87 @@ c
       write(iott,*) ' ************************************************'
 
       keycut   = 0
-	young_x  = prop(1)
-	young_y  = prop(2)
-	young_z  = prop(3)
-	pr_xy    = prop(4)
-	pr_yz    = prop(5)
-	pr_xz    = prop(6)
-	g_xy     = prop(7)
-	g_yz     = prop(8)
-	g_xz     = prop(9)
 	
-	
-	pr_yx = (young_y * pr_xy) / young_x
-	pr_zy = (young_z * pr_yz) / young_y
-	pr_zx = (young_z * pr_xz) / young_x
-	
-	
-	xy_yx = pr_xy*pr_yx
-	yz_zy = pr_yz*pr_zy 
-	zx_xz = pr_zx*pr_xz
-	xyz   = TWO*pr_xy*pr_yz*pr_zx
-	E_xyz = young_x*young_y*young_z
-	
-	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
-	
-	
-	
-********* ELASTIC STIFFNESS MATRIX *********
-	
-	dsdeEl(1,1) = (ONE -yz_zy) / (young_y*young_z*delta)
-	dsdeEl(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-	dsdeEl(1,3) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)
-	dsdeEl(1,4) = 0
-	dsdeEl(1,5) = 0
-	dsdeEl(1,6) = 0
-	dsdeEl(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-	dsdeEl(2,2) = (ONE -zx_xz) / (young_x*young_z*delta)
-	dsdeEl(2,3) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)
-	dsdeEl(2,4) = 0
-	dsdeEl(2,5) = 0
-	dsdeEl(2,6) = 0
-	dsdeEl(3,1) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)
-	dsdeEl(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)
-	dsdeEl(3,3) = (ONE -xy_yx) / (young_x*young_y*delta)
-	dsdeEl(3,4) = 0
-	dsdeEl(3,5) = 0
-	dsdeEl(3,6) = 0
-	dsdeEl(4,1) = 0
-	dsdeEl(4,2) = 0 
-	dsdeEl(4,3) = 0
-	dsdeEl(4,4) = TWO * g_yz
-	dsdeEl(4,5) = 0
-	dsdeEl(4,6) = 0
-	dsdeEl(5,1) = 0
-	dsdeEl(5,2) = 0 
-	dsdeEl(5,3) = 0
-	dsdeEl(5,4) = 0
-	dsdeEl(5,5) = TWO * g_xz
-	dsdeEl(5,6) = 0
-	dsdeEl(6,1) = 0
-	dsdeEl(6,2) = 0 
-	dsdeEl(6,3) = 0
-	dsdeEl(6,4) = 0
-	dsdeEl(6,5) = 0
-	dsdeEl(6,6) = TWO * g_xy
 
+c *** get Young's modulus and Poisson's ratio, initial yield stress and others
+      young    = prop(1)
+      posn     = prop(2)
+      twoG     = young / (ONE+posn)
 	
+	
+c *** define tsstif(1) since it is used for calculation of hourglass stiffness
+      tsstif(1) = HALF * twoG
+
+********* ELASTIC STIFFNESS MATRIX *********
+      c1 = ONE - posn * posn
+      c2 = young / c1
+      c3 = posn * c2
+      
+      dsdeEl (1,1) = c2
+      dsdeEl (1,2) = c3
+      dsdeEl (1,3) = ZERO
+      dsdeEl (2,2) = c2
+      dsdeEl (2,3) = ZERO
+      dsdeEl (3,3) = HALF * twoG
+     
+      do i=1,ncomp-1
+        do j=i+1,ncomp
+          dsdeEl(j,i)=dsdeEl(i,j)
+        end do
+      end do
+
+c *** get initial stress
+*      call vzero(sigi(1),ncomp)
+*      i = ncomp
+*      call get_ElmData ('ISIG', elemId,kDomIntPt, i, sigi)
+
       
 ****  Calculate the total strain
-
       do i=1,ncomp
          Strain(i) = Strain(i) + dStrain(i) 
       end do
       
-	
+
+
+
 ***** Calculate the current stress ********	
       
       do i=1,ncomp
-         do j=1,ncomp
-            dsdePl(i,j) = dsdeEl(i,j)
-            stress(i) = stress(i) + dsdeEl(i,j)*dStrain(j)
-         end do
-	end do
-	
-	
+        do j=1,ncomp
+          dsdePl(i,j) = dsdeEl(i,j)
+           stress(i) = stress(i) + dsdeEl(i,j)*dStrain(j)
+        end do
+      end do
 
-	
-	
-******** Elastic work ********
+*      call vzero(sigma, 6)
+
+
+***** Calculate the current stress ********	
+      
+*      do i=1,ncomp
+*         do j=1,ncomp
+*            dsdePl(j,i) = dsdeEl(j,i)
+*            sigma(i) = sigma(i) + dsdeEl(j,i)*Strain(j)
+*         end do
+*         sigma(i)  =  sigma(i) + sigi(i)
+*      end do
+
+*      do i=1,ncomp
+*         stress(i) = sigma(i)
+*      end do           
+
+      
+      epsZZ    = -posn/young * (stress(1) + stress(2))      
+
+      
+****** Calculate the Elastic work *******  
       sedEl = ZERO
       DO i = 1 , ncomp
          sedEl = sedEl + stress(i)*(Strain(i))
       END DO
       sedEl    = sedEl * HALF
+
+	
 c
       return
       end

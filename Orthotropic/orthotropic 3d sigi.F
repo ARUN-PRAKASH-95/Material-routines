@@ -166,7 +166,7 @@ c
 	xy_yx = pr_xy*pr_yx
 	yz_zy = pr_yz*pr_zy 
 	zx_xz = pr_zx*pr_xz
-	xyz   = TWO*pr_xy*pr_yz*pr_xz
+	xyz   = TWO*pr_xy*pr_yz*pr_zx
 	E_xyz = young_x*young_y*young_z
 	
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
@@ -181,14 +181,14 @@ c
 	dsdeEl(1,4) = 0
 	dsdeEl(1,5) = 0
 	dsdeEl(1,6) = 0
-	dsdeEl(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
+	dsdeEl(2,1) = (pr_xy + pr_xz*pr_zy) / (young_x*young_z*delta)
 	dsdeEl(2,2) = (ONE -zx_xz) / (young_x*young_z*delta)
 	dsdeEl(2,3) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)
 	dsdeEl(2,4) = 0
 	dsdeEl(2,5) = 0
 	dsdeEl(2,6) = 0
-	dsdeEl(3,1) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)
-	dsdeEl(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)
+	dsdeEl(3,1) = (pr_xz + pr_xy*pr_yz) / (young_y*young_x*delta)
+	dsdeEl(3,2) = (pr_yz + pr_xz*pr_yx) / (young_x*young_y*delta)
 	dsdeEl(3,3) = (ONE -xy_yx) / (young_x*young_y*delta)
 	dsdeEl(3,4) = 0
 	dsdeEl(3,5) = 0
@@ -196,21 +196,21 @@ c
 	dsdeEl(4,1) = 0
 	dsdeEl(4,2) = 0 
 	dsdeEl(4,3) = 0
-	dsdeEl(4,4) = TWO * g_yz
+	dsdeEl(4,4) = TWO * g_xy
 	dsdeEl(4,5) = 0
 	dsdeEl(4,6) = 0
 	dsdeEl(5,1) = 0
 	dsdeEl(5,2) = 0 
 	dsdeEl(5,3) = 0
 	dsdeEl(5,4) = 0
-	dsdeEl(5,5) = TWO * g_xz
+	dsdeEl(5,5) = TWO * g_yz
 	dsdeEl(5,6) = 0
 	dsdeEl(6,1) = 0
 	dsdeEl(6,2) = 0 
 	dsdeEl(6,3) = 0
 	dsdeEl(6,4) = 0
 	dsdeEl(6,5) = 0
-	dsdeEl(6,6) = TWO * g_xy
+	dsdeEl(6,6) = TWO * g_xz
 
 
 c *** get initial stress
@@ -232,7 +232,7 @@ c *** get initial stress
       do i=1,ncomp
          do j=1,ncomp
             dsdePl(j,i) = dsdeEl(j,i)
-            sigma(i) = sigma(i) + dsdeEl(j,i)*Strain(j)
+            sigma(i) = sigma(i) + dsdeEl(j,i)*dStrain(j)
          end do
          sigma(i)  =  sigma(i) + sigi(i)
       end do
