@@ -152,10 +152,9 @@ c
 	pr_xy    = prop(4)
 	pr_yz    = prop(5)
 	pr_xz    = prop(6)
-	g_xy     = prop(7)
-	g_yz     = prop(8)
-	g_xz     = prop(9)
-	
+	g_xy     = 5000000000
+	g_yz     = 3846200000
+	g_xz     = 5000000000
 	
 	pr_yx = (young_y * pr_xy) / young_x
 	pr_zy = (young_z * pr_yz) / young_y
