@@ -35,7 +35,7 @@ q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=4;
+ltype=1;
 if ltype==1
     t=[0 10];
     lam=[0 0.005];
@@ -130,72 +130,41 @@ for n=1:steps
     eps22(n+1)=epsilon(2); eps33(n+1)=epsilon(3); 
 
 end % for
-
+fprintf('********************\n')
 close(wb)
 %
-if ltype==4
-    [stress_analyt_sol,strain_analyt_sol,epsilon_plast_analyt_sol] = ...
-        analyt_sol_vM_plast_strain_contr_uniaxial_stress(t(2),t(3),lam(2),n_ampl);
-end
-%--------------------------------------------------------------------------
-% postprocessing
-%--------------------------------------------------------------------------
 
-%[paperX, paperY] = paper_values();
-
-% plot loading/unloading path
 figure(1)
 %subplot(2,1,1)
 plot(time,e11)
 xlabel('time')
 ylabel('e11')
 
+
 % plot stress-strain response
 figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
 plot(e11,s11,'r-')
-if ltype==4
-    hold on
-    plot(strain_analyt_sol(1,:),stress_analyt_sol(1,:),'ko-.')
-    legend('\sigma_{11}','Ref.','Location','NorthWest')
-else
-    legend('\sigma_{11}','Location','NorthWest')
-end
+legend('\sigma_{11}','Ref.','Location','NorthWest')
 xlabel('eps11')
 ylabel('sig11')
- %hleg1 = legend('program','paper');
- %set(hleg1,'Location','NorthWest')
  
-% plot lateral strains
+
+ 
+ % plot lateral strains
 figure(3)
 plot(e11,eps22,'b-')
 hold on
 plot(e11,eps33,'g-')
-if ltype==4
-    hold on 
-    plot(strain_analyt_sol(1,:),strain_analyt_sol(2,:),'ko-.')
-    plot(strain_analyt_sol(1,:),strain_analyt_sol(3,:),'ko-.')
-    legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
-else
-    legend('\epsilon_{22}','\epsilon_{33}','Location','NorthEast')
-end
+legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
 xlabel('eps11')
 ylabel('eps22, eps33')
-%
-% plot plastic strain
+
+
+% plot damage
 figure(4)
 plot(e11,sdv(1,:),'r-')
-hold on
-plot(e11,sdv(2,:),'b-')
-plot(e11,sdv(3,:),'g-')
+legend('damage','Ref.','Location','West')
 xlabel('eps11')
-if ltype==4
-    plot(strain_analyt_sol(1,:),epsilon_plast_analyt_sol(1,:),'ko-.')
-    plot(strain_analyt_sol(1,:),epsilon_plast_analyt_sol(2,:),'ko-.')
-    plot(strain_analyt_sol(1,:),epsilon_plast_analyt_sol(3,:),'ko-.')
-    legend('\epsilon_{11}^{p}','\epsilon_{22}^{p}','\epsilon_{33}^{p}','Ref.','Location','West')
-else
-    legend('\epsilon_{11}^{p}','\epsilon_{22}^{p}','\epsilon_{33}^{p}','Location','West')
-end
-%
+ylabel('damage')

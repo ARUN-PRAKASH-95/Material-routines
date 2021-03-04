@@ -20,7 +20,7 @@ if ltype==1
     t=[0 10];
     lam=[0 n_ampl*sigma_y0/2/mu];
 end
-disp(lam);
+%disp(lam);
 %
 % computation of tangent moduli
 ttype = 0; % 0: analytical
@@ -77,8 +77,8 @@ hold on
 plot(e11,s11,'r-')
 %
 xlabel('\epsilon_{11}','FontSize',12)
-ylabel('\sigma_{11}, \sigma_{22}, \sigma_{33} in MPa','FontSize',12)
-legend('\sigma_{11}','\sigma_{22}','\sigma_{33}','Ref.','Location','East')
+ylabel('\sigma_{11}','FontSize',12)
+legend('\sigma_{11}','Ref.','Location','East')
 %
 
 figure(2)

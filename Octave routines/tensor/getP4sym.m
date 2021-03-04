@@ -25,7 +25,7 @@ function [P4sym] = getP4sym()
 		for j = 1:3
 			for k = 1:3
 				for l = 1:3
-                    P4sym(i,j,k,l) = I4sym(i,j,k,l)-1/3*I(i,j)*I(k,l); 
+          P4sym(i,j,k,l) = I4sym(i,j,k,l) %- 1/3*I(i,j)*I(k,l); 
 				end
 			end
 		end 
