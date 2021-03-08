@@ -35,16 +35,16 @@ q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=1;
+ltype=3;
 if ltype==1
     t=[0 10];
-    lam=[0 0.005];
+    lam=[0 0.001];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
 elseif ltype==3
     t=[0 5 10];
-    lam=[0 0.005 0.001];
+    lam=[0 0.0015 0.0000];
 elseif ltype==4
     t=[0 2.5 7.5 10];
     lam=[0 n_ampl*sigma_y0/2/mu/(1-q_el) -n_ampl*sigma_y0/2/mu/(1-q_el)];
@@ -68,6 +68,7 @@ e11=loading(ltype,dt,t,lam);
 
 % initialize strains, temperature and internal variables
 epsbar=zeros(5,1);
+sdv = zeros(1,steps);
 sdv(1,1)=0; 
 
 % initialise quantities for post-processing
@@ -75,7 +76,7 @@ s11=zeros(1,steps);
 eps22=zeros(1,steps); eps33=zeros(1,steps);
 
 % tolerance and maximum no. of iterations for Newton iteration
-tol=1e-10;
+tol=1e-5;
 maxit=100;
 ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
@@ -104,6 +105,7 @@ for n=1:steps
         
         % 1.) total deformation
          epsilon(1,1) = e11(n+1);
+         epsilon(1,1)
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 

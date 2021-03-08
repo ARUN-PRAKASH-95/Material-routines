@@ -7,9 +7,10 @@ xid = eye(3);
 
 % Lames constants
 lambda  =  xE * xnu / ((1 + xnu) * (1 - 2*xnu))
-xmu  = xE/(2*(1+xnu))    % shear modulus
+mu  = xE/(2*(1+xnu))    % shear modulus
+lambda+2*mu
 
-C = 2*xmu*getP4sym() +xk*t2_otimes_t2(xid,xid)
+C = 2*mu*getP4sym() +xk*t2_otimes_t2(xid,xid);
 
 ii = [1,2,3,1,2,1];
 jj = [1,2,3,2,3,3];
@@ -20,4 +21,14 @@ A66=zeros(6,6);
         A66(i,j) = C(ii(i),jj(i),ii(j),jj(j));
         end
     end
-A66
+
+    
+ C2 = zeros(3,3,3,3);
+    %if ttype==0
+    for i=1:6
+        for j=1:6
+         C2(ii(i),jj(i),ii(j),jj(j)) = A66(i,j);
+        end
+    end
+    
+ C2
