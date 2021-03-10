@@ -128,7 +128,7 @@ c
      &                  sigi (mcomp), strains(mcomp),
      &                  id(3,3), c2(3,3,3,3), c1(3,3,3,3),
      &                  C(3,3,3,3), ii(mcomp), jj(mcomp),
-     &                  c3(3,3), Strain_tensor(3,3),
+     &                  c_three(3,3), Strain_tensor(3,3),
      &                  a(3,3,3,3),b2(3,3),b(3,3),
      &                  d(3,3,3,3), C_T(3,3,3,3)
                   
@@ -174,6 +174,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       twoG     = young / (ONE+posn)
 	yield    = 200
 	n        = 3 
+      damage   = ustatev(1)
 	
 c *** define tsstif(1) since it is used for calculation of hourglass stiffness
       tsstif(1) = HALF * twoG
@@ -183,7 +184,7 @@ c *** define tsstif(1) since it is used for calculation of hourglass stiffness
       
       lambda   =  young*posn / ((ONE + posn)*(1 - TWO*posn)) 
       mu       =  young / (TWO*(1+posn))
-	xK    =  young / (THREE*(1 - TWO*posn))
+	xK       =  young / (THREE*(1 - TWO*posn))
 
       
       
@@ -242,7 +243,7 @@ c *** Calculate current strain
           
           do i=1,ncomp
              do j=1,ncomp
-                stress(i) = stress(i) + dsdeEl(j,i)*dStrain(j)
+                stress(i) = stress(i) +(1-damage)*dsdeEl(j,i)*dStrain(j)
              end do
           end do
           
@@ -255,7 +256,9 @@ c *** Calculate current strain
           else
               damage = damage
           endif
-      
+          
+          
+          
           do i=1,ncomp
              do j=1,ncomp
                 stress(i) = stress(i)+(1-damage)*dsdeEl(j,i)*dStrain(j)
@@ -278,20 +281,23 @@ c*************** First term of the tangent stiffness (1-d+eta)*C **********
 c*************** Second term of the tangent stiffness ********
           b1 = P*exp(-P*(strains(1)-epsilon_f))
       
-          b2 = transpose(reshape((/ 1, 0, 0, 0, 1, 0, 0, 0, 0 /), 
-     &         shape(b2)))      
+          b2 = transpose(reshape((/ ONE, ZERO, ZERO, ZERO, ZERO, ZERO, 
+     &    ZERO,ZERO,ZERO /),shape(b2)))  
+                  
       
           do i = 1,3
               do j = 1,3
-                  b = b1*b2(i,j)
+                  b(i,j) = b1*b2(i,j)
               end do
           end do
 
 c****  Double contraction of 4th order elastic stiffness and 2nd order strain *******
-          call t4_contr_t2(C,Strain_tensor,c3) 
+          call t4_contr_t2(C,Strain_tensor,c_three) 
 
-          call t2_dyad_t2(ONE,b,c3,d)
+c****  Dyadic product of two 2nd order tensors ******
+          call t2_dyad_t2(ONE,c_three,b,d)
 
+c**** Tangent stiffness *****
           do i = 1,n
 		       do j = 1,n
 			       do k=1,n
@@ -304,11 +310,13 @@ c****  Double contraction of 4th order elastic stiffness and 2nd order strain **
 
       endif
       
+      ustatev(1) = damage
+      
 **********Restore stiffness tensor as 6*6 matrix***********
        if (strains(1) < epsilon_f) then      
           do i = 1,mcomp
                do j = 1,mcomp
-                   dsdePl(i,j) = C(ii(i),jj(i),ii(j),jj(j))
+                   dsdePl(i,j) = (1 - damage)*C(ii(i),jj(i),ii(j),jj(j))
                end do
           end do    
        else 
@@ -335,11 +343,11 @@ c
       
 
 c************  Subroutine for dyadic product of two second order tensors   **********      
-	subroutine t2_dyad_t2(s,A,B,C)
+	subroutine t2_dyad_t2(s,O,R,Q)
         double precision s
-        double precision C(3,3,3,3)
-        double precision A(3,3)
-	  double precision B(3,3)
+        double precision Q(3,3,3,3)
+        double precision O(3,3)
+	  double precision R(3,3)
         integer i,j,k,l,n
         n = 3
         
@@ -350,7 +358,7 @@ c************  Subroutine for dyadic product of two second order tensors   *****
              do j = 1,n
 			   do k=1,n
 				   do l=1,n
-						C(i,j,k,l) = s*A(i,j)*B(k,l)
+						Q(i,j,k,l) = s*O(i,j)*R(k,l)
 				   end do
                 end do
 		   end do
@@ -361,10 +369,10 @@ c************  Subroutine for dyadic product of two second order tensors   *****
 
       
 c************  Subroutine for P4sym term  **********      
-	subroutine getP4sym(mu,A,C)
+	subroutine getP4sym(mu,E,F)
         double precision mu
-        double precision C(3,3,3,3),I4sym(3,3,3,3)
-        double precision A(3,3)
+        double precision F(3,3,3,3),I4sym(3,3,3,3)
+        double precision E(3,3)
         integer i,j,k,l,n
         n = 3
                  
@@ -375,8 +383,8 @@ c************  Subroutine for P4sym term  **********
            do j = 1,n
                do k=1,n
                    do l=1,n
-                      I4sym(i,j,k,l) = (0.5)*(A(i,k)*A(j,l)
-     &                 +A(i,l)*A(j,k))
+                      I4sym(i,j,k,l) = (0.5)*(E(i,k)*E(j,l)
+     &                 +E(i,l)*E(j,k))
                   end do
               end do
           end do
@@ -386,8 +394,8 @@ c************  Subroutine for P4sym term  **********
           do j = 1,n
               do k=1,n
                   do l=1,n
-                      C(i,j,k,l) = 2*mu*(I4sym(i,j,k,l)-
-     &                      (0.33)*(A(i,j)*A(k,l)))
+                      F(i,j,k,l) = 2*mu*(I4sym(i,j,k,l)-
+     &                      (0.33)*(E(i,j)*E(k,l)))
                   end do
               end do
            end do
@@ -399,11 +407,11 @@ c************  Subroutine for P4sym term  **********
 
 
 c************  Subroutine for dyadic product of 4th and 2nd tensors   **********      
-	subroutine t4_contr_t2(C,A,B)
+	subroutine t4_contr_t2(C,Strain_tensor,c_three)
         
         double precision C(3,3,3,3)
-        double precision A(3,3)
-	  double precision B(3,3)
+        double precision Strain_tensor(3,3)
+	  double precision c_three(3,3)
         integer i,j,k,l,n
         n = 3
         
@@ -414,7 +422,7 @@ c************  Subroutine for dyadic product of 4th and 2nd tensors   **********
              do j = 1,n
 			   do k=1,n
 				   do l=1,n
-						B(i,j) = B(i,j) + C(i,j,k,l)*A(k,l)
+						c_three(i,j) = C(i,j,k,l) * Strain_tensor(k,l)
 				   end do
                 end do
 		   end do

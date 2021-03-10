@@ -23,7 +23,7 @@ addpath('analyt_sol/');
 n_ampl=3;      % n_ampl>1
 %
 mat_param = inputmat();
-xE = mat_param(1); xnu = mat_param(2); sigma_y0 = mat_param(3);
+xE = mat_param(1); xnu = mat_param(4); sigma_y0 = mat_param(10);
 mu = xE/(2*(1+xnu)); kappa = xE/(3*(1-2*xnu));
 q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 %
@@ -38,13 +38,13 @@ q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 ltype=3;
 if ltype==1
     t=[0 10];
-    lam=[0 0.001];
+    lam=[0 0.14];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
 elseif ltype==3
     t=[0 5 10];
-    lam=[0 0.0015 0.0000];
+    lam=[0 0.04 0.0000];
 elseif ltype==4
     t=[0 2.5 7.5 10];
     lam=[0 n_ampl*sigma_y0/2/mu/(1-q_el) -n_ampl*sigma_y0/2/mu/(1-q_el)];
@@ -76,7 +76,7 @@ s11=zeros(1,steps);
 eps22=zeros(1,steps); eps33=zeros(1,steps);
 
 % tolerance and maximum no. of iterations for Newton iteration
-tol=1e-5;
+tol=1e-7;
 maxit=100;
 ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
