@@ -130,7 +130,7 @@ c
      &                  C(3,3,3,3), ii(mcomp), jj(mcomp),
      &                  c_three(3,3), Strain_tensor(3,3),
      &                  a(3,3,3,3),b2(3,3),b(3,3),
-     &                  d(3,3,3,3)
+     &                  d(3,3,3,3),T_strain(mcomp)
                   
 
       
@@ -226,33 +226,33 @@ c**********  Calculate the failure strain ************
 
 c *** Calculate current strain
       do i=1,ncomp
-         Strain(i) =  Strain(i) + dStrain(i) 
+         T_strain(i) =  Strain(i) + dStrain(i) 
       end do
   
 
       
 C********  Restore strain tensor ***********
-      Strain_tensor = transpose(reshape((/ Strain(1), Strain(4)/TWO, 
-     &     Strain(6)/TWO, Strain(4)/TWO, Strain(2), Strain(5)/TWO,
-     &                Strain(6)/TWO	, Strain(5)/TWO, Strain(3) /), 
-     &                shape(Strain_tensor)))
+      Strain_tensor = transpose(reshape((/ T_strain(1), T_strain(4)/TWO, 
+     &    T_strain(6)/TWO, T_strain(4)/TWO, T_strain(2),T_strain(5)/TWO,
+     &    T_strain(6)/TWO	, T_strain(5)/TWO, T_strain(3) /), 
+     &    shape(Strain_tensor)))
 
       
       
-      
+      call vzero(sigma, 6)      
 ***** Calculate the current stress ********	
-      if (Strain(1) < epsilon_f) then
+      if (T_strain(1) < epsilon_f) then
           
           do i=1,ncomp
              do j=1,ncomp
-                stress(i) = stress(i) + ((ONE+eta-damage)
-     &            *dsdeEl(i,j)*dStrain(j))
+                sigma(i) = sigma(i) + ((ONE+eta-damage)
+     &                     *dsdeEl(i,j)*T_strain(j))
              end do
           end do
           
       else
           
-          damage_new = ONE  - exp(-P*(Strain(1)-epsilon_f))
+          damage_new = ONE  - exp(-P*(T_strain(1)-epsilon_f))
           
           if (damage_new >= damage) then
               damage = damage_new
@@ -264,8 +264,8 @@ C********  Restore strain tensor ***********
           
           do i=1,ncomp
              do j=1,ncomp
-                stress(i) = stress(i) + ((ONE+eta-damage)
-     &            *dsdeEl(i,j)*dStrain(j))
+                sigma(i) = sigma(i) + ((ONE+eta-damage)
+     &            *dsdeEl(i,j)*T_strain(j))
              end do
           end do          
           
@@ -283,7 +283,7 @@ c*************** First term of the tangent stiffness (1-d+eta)*C **********
 
       
 c*************** Second term of the tangent stiffness ********
-          b1 = P*exp(-P*(Strain(1)-epsilon_f))
+          b1 = P*exp(-P*(T_strain(1)-epsilon_f))
       
           b2 = transpose(reshape((/ ONE, ZERO, ZERO, ZERO, ZERO, ZERO, 
      &    ZERO,ZERO,ZERO /),shape(b2)))  
@@ -315,9 +315,14 @@ c**** Tangent stiffness *****
       endif
       
       ustatev(1) = damage
+	
+c *** Update stress i
+      do i=1,ncomp
+         stress(i) = sigma(i)
+      end do
       
 **********Restore stiffness tensor as 6*6 matrix***********
-       if (Strain(1) < epsilon_f) then      
+       if (T_strain(1) < epsilon_f) then      
           do i = 1,mcomp
                do j = 1,mcomp
                    dsdePl(i,j) = (ONE+eta - damage)

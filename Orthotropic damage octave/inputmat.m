@@ -10,5 +10,7 @@ matp(6)  = 0.27;              % Poisson_xz
 matp(7)  = 4700e6;            % Shear_mod_xy
 matp(8)  = 4700e6;            % Shear_mod_yz
 matp(9)  = 4700e6;            % Shear_mod_xz
-matp(10) = 1250e6;            % Longitudinal tensile strength   
+matp(10) = 1250e6;            % Longitudinal tensile strength    
+
+
 end

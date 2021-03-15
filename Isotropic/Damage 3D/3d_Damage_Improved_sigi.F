@@ -130,7 +130,7 @@ c
      &                  C(3,3,3,3), ii(mcomp), jj(mcomp),
      &                  c_three(3,3), Strain_tensor(3,3),
      &                  a(3,3,3,3),b2(3,3),b(3,3),
-     &                  d(3,3,3,3)
+     &                  d(3,3,3,3),T_strain(mcomp)
                   
 
       
@@ -183,9 +183,9 @@ c *** define tsstif(1) since it is used for calculation of hourglass stiffness
 
 ********   LAME'S CONSTANTS ********
       
-      lambda   =  young*posn / ((ONE + posn)*(ONE - TWO*posn)) 
-      mu       =  young / (TWO*(ONE+posn))
-	xK       =  young / (THREE*(ONE - TWO*posn))
+      lambda   =  young*posn / ((ONE + posn)*(1 - TWO*posn)) 
+      mu       =  young / (TWO*(1+posn))
+	xK       =  young / (THREE*(1 - TWO*posn))
 
       
 
@@ -226,33 +226,39 @@ c**********  Calculate the failure strain ************
 
 c *** Calculate current strain
       do i=1,ncomp
-         Strain(i) =  Strain(i) + dStrain(i) 
+         T_strain(i) =  Strain(i) + dStrain(i) 
       end do
   
 
       
 C********  Restore strain tensor ***********
-      Strain_tensor = transpose(reshape((/ Strain(1), Strain(4)/TWO, 
-     &     Strain(6)/TWO, Strain(4)/TWO, Strain(2), Strain(5)/TWO,
-     &                Strain(6)/TWO	, Strain(5)/TWO, Strain(3) /), 
-     &                shape(Strain_tensor)))
+      Strain_tensor = transpose(reshape((/ T_strain(1), T_strain(4)/TWO, 
+     &    T_strain(6)/TWO, T_strain(4)/TWO, T_strain(2),T_strain(5)/TWO,
+     &    T_strain(6)/TWO	, T_strain(5)/TWO, T_strain(3) /), 
+     &    shape(Strain_tensor)))
 
+
+	
+c *** get initial stress
+      call vzero(sigi(1),ncomp)
+      i = ncomp
+      call get_ElmData ('ISIG', elemId,kDomIntPt, i, sigi)
       
-      
-      
+      call vzero(sigma, 6)      
 ***** Calculate the current stress ********	
-      if (Strain(1) < epsilon_f) then
+      if (T_strain(1) < epsilon_f) then
           
           do i=1,ncomp
              do j=1,ncomp
-                stress(i) = stress(i) + ((ONE+eta-damage)
-     &            *dsdeEl(i,j)*dStrain(j))
-             end do
+                sigma(i) = sigma(i) + (1+eta-damage)
+     &            *dsdeEl(i,j)*T_strain(j)
+		   end do
+		   sigma(i) = sigma(i) + sigi(i)
           end do
           
       else
           
-          damage_new = ONE  - exp(-P*(Strain(1)-epsilon_f))
+          damage_new = 1  - exp(-P*(T_strain(1)-epsilon_f))
           
           if (damage_new >= damage) then
               damage = damage_new
@@ -264,9 +270,10 @@ C********  Restore strain tensor ***********
           
           do i=1,ncomp
              do j=1,ncomp
-                stress(i) = stress(i) + ((ONE+eta-damage)
-     &            *dsdeEl(i,j)*dStrain(j))
-             end do
+                sigma(i) = sigma(i) + (1+eta-damage)
+     &            *dsdeEl(i,j)*T_strain(j)
+		   end do
+		   sigma(i) = sigma(i) + sigi(i)
           end do          
           
 c*************** First term of the tangent stiffness (1-d+eta)*C **********          
@@ -274,7 +281,7 @@ c*************** First term of the tangent stiffness (1-d+eta)*C **********
 		       do j = 1,n
 			       do k=1,n
 				       do l=1,n
-                            a(i,j,k,l) = (ONE + eta- damage)*C(i,j,k,l) 
+                            a(i,j,k,l) = (1 + eta- damage)*C(i,j,k,l) 
 				       end do
                     end do
 		       end do
@@ -315,12 +322,17 @@ c**** Tangent stiffness *****
       endif
       
       ustatev(1) = damage
+	
+c *** Update stress i
+      do i=1,ncomp
+         stress(i) = sigma(i)
+      end do
       
 **********Restore stiffness tensor as 6*6 matrix***********
-       if (Strain(1) < epsilon_f) then      
+       if (T_strain(1) < epsilon_f) then      
           do i = 1,mcomp
                do j = 1,mcomp
-                   dsdePl(i,j) = (ONE+eta - damage)
+                   dsdePl(i,j) = (1+eta - damage)
      &               *C(ii(i),jj(i),ii(j),jj(j))
                end do
           end do    
@@ -406,7 +418,7 @@ c************  Subroutine for P4sym term  **********
 	  end
 
 
-c************  Subroutine for double contraction of 4th and 2nd tensors   **********      
+c************  Subroutine for dyadic product of 4th and 2nd tensors   **********      
 	subroutine t4_contr_t2(C,Strain_tensor,c_three)
         
         double precision C(3,3,3,3)
