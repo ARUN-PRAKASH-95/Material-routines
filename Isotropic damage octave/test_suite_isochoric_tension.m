@@ -15,7 +15,7 @@ mu = xE/(2*(1+xnu));
 % define loading
 % 1: linear ramping of load
 ltype=1;
-dt=2;
+dt=0.1;
 if ltype==1
     t=[0 10];
     lam=[0 n_ampl*sigma_y0/2/mu];
