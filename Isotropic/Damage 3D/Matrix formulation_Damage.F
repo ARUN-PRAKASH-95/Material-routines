@@ -120,21 +120,24 @@ c
      &                 mcomp      = 6
      &                 )
 	
-      EXTERNAL          vzero, vmove, get_ElmData,
-     &                  t2_dyad_t2, getP4sym
+      EXTERNAL          vzero, vmove, get_ElmData
+
    
       double precision  dsdeEl(mcomp,mcomp), sigma(mcomp),
-     &                  sigi (mcomp), I4sym(3,3,3,3),
-     &                  id(3,3), c2(3,3,3,3), c1(3,3,3,3),
-     &                  C(3,3,3,3), ii(mcomp), jj(mcomp),
-     &                  T_strain(mcomp)
-                
+     &                  sigi (mcomp), C_T(mcomp,mcomp),
+     &                  id(3,3), ii(mcomp), jj(mcomp),
+     &                  c_three(mcomp), T_strain(mcomp),
+     &                  a(mcomp,mcomp),b2(mcomp),b(mcomp),
+     &                  d(mcomp,mcomp)
+                  
 
       
-      integer             i,j,k,l,n
+      integer             i,j,k,l,n,P
       double precision    young, posn, mu,  
      &                    twoG, lambda,
-     &                    Kappa
+     &                    xK, yield,epsilon_f,damage,
+     &                    damage_new,b1,eta
+   
       
 
       
@@ -167,8 +170,11 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       young    = prop(1)
       posn     = prop(2)
       twoG     = young / (ONE+posn)
+	yield    = 200
 	n        = 3 
-	
+      damage   = ustatev(1)
+	eta      = 1e-5
+      
 c *** define tsstif(1) since it is used for calculation of hourglass stiffness
       tsstif(1) = HALF * twoG
 
@@ -177,40 +183,53 @@ c *** define tsstif(1) since it is used for calculation of hourglass stiffness
       
       lambda   =  young*posn / ((ONE + posn)*(ONE - TWO*posn)) 
       mu       =  young / (TWO*(ONE+posn))
-	Kappa    =  young / (THREE*(ONE - TWO*posn))
+	xK       =  young / (THREE*(ONE - TWO*posn))
 
       
-      
-c****** First term of the stiffness tensor(c1)
-      call getP4sym(mu,id,I4sym,c1)
-      
-      
-      
-c****** Second term of the stiffness tensor(c2)
-      call t2_dyad_t2(Kappa,id,c2)
-      
-      
-********* ELASTIC STIFFNESS TENSOR *********
-        
-      
-      do i = 1,n
-		   do j = 1,n
-			   do k=1,n
-				   do l=1,n
-                        C(i,j,k,l) = c1(i,j,k,l) + c2(i,j,k,l)
-				   end do
-                end do
-		   end do
-      end do 
-      
-      
-**********Restore stiffness tensor as 6*6 matrix***********
-         do i = 1,mcomp
-           do j = 1,mcomp
-               dsdeEl(i,j) = C(ii(i),jj(i),ii(j),jj(j))
-           end do
-        end do         
-      
+
+********* ELASTIC STIFFNESS MATRIX *********
+	
+	dsdeEl(1,1) = lambda + TWO * mu
+	dsdeEl(1,2) = lambda
+	dsdeEl(1,3) = lambda
+	dsdeEl(1,4) = 0
+	dsdeEl(1,5) = 0
+	dsdeEl(1,6) = 0
+	dsdeEl(2,1) = lambda
+	dsdeEl(2,2) = lambda + TWO * mu
+	dsdeEl(2,3) = lambda
+	dsdeEl(2,4) = 0
+	dsdeEl(2,5) = 0
+	dsdeEl(2,6) = 0
+	dsdeEl(3,1) = lambda
+	dsdeEl(3,2) = lambda 
+	dsdeEl(3,3) = lambda + TWO * mu
+	dsdeEl(3,4) = 0
+	dsdeEl(3,5) = 0
+	dsdeEl(3,6) = 0
+	dsdeEl(4,1) = 0
+	dsdeEl(4,2) = 0 
+	dsdeEl(4,3) = 0
+	dsdeEl(4,4) = mu
+	dsdeEl(4,5) = 0
+	dsdeEl(4,6) = 0
+	dsdeEl(5,1) = 0
+	dsdeEl(5,2) = 0 
+	dsdeEl(5,3) = 0
+	dsdeEl(5,4) = 0
+	dsdeEl(5,5) = mu
+	dsdeEl(5,6) = 0
+	dsdeEl(6,1) = 0
+	dsdeEl(6,2) = 0 
+	dsdeEl(6,3) = 0
+	dsdeEl(6,4) = 0
+	dsdeEl(6,5) = 0
+	dsdeEl(6,6) = mu
+
+
+c**********  Calculate the failure strain ************         
+         epsilon_f = yield / dsdeEl(1,1)
+         P = 2500
 
       
 
@@ -218,224 +237,116 @@ c *** Calculate current strain
       do i=1,ncomp
          T_strain(i) =  Strain(i) + dStrain(i) 
       end do
+  
+
       
-
-
-      call vzero(sigma, 6) 
+      call vzero(sigma, 6)      
 ***** Calculate the current stress ********	
+      if (T_strain(1) < epsilon_f) then
+          
+          do i=1,ncomp
+             do j=1,ncomp
+                sigma(i) = sigma(i) + ((ONE+eta-damage)
+     &                     *dsdeEl(i,j)*T_strain(j))
+             end do
+          end do
+          
+      else
+          
+          damage_new = ONE  - exp(-P*(T_strain(1)-epsilon_f))
+          
+          if (damage_new >= damage) then
+              damage = damage_new
+          else
+              damage = damage
+          endif
+          
+          
+          
+          do i=1,ncomp
+             do j=1,ncomp
+                sigma(i) = sigma(i) + ((ONE+eta-damage)
+     &            *dsdeEl(i,j)*T_strain(j))
+             end do
+          end do          
+          
+c*************** First term of the tangent stiffness (1-d+eta)*C **********          
+          do i = 1,mcomp
+		       do j = 1,mcomp
+                       a(i,j) = (ONE + eta- damage)*dsdeEl(i,j) 
+		       end do
+          end do           
+          
+
       
-      do i=1,ncomp
-         do j=1,ncomp
-            dsdePl(i,j) = dsdeEl(i,j)
-            sigma(i) = sigma(i) + dsdeEl(i,j)*T_strain(j)
-         end do
-	end do
+c*************** Second term of the tangent stiffness ********
+          b1 = P*exp(-P*(T_strain(1)-epsilon_f))
+      
+          b2 = (/ ONE, ZERO, ZERO, ZERO, ZERO, ZERO  /) 
+        
+                  
+      
+          do i = 1,mcomp
+              b(i) = b1*b2(i)
+          end do
+          
+          
+c****  Double contraction of 4th order elastic stiffness and 2nd order strain *******                    
+          do i=1,ncomp
+             do j=1,ncomp
+                 c_three(i)  = dsdeEl(i,j)*T_strain(j)
+             end do
+          end do
+                 
 
 
+c****  Dyadic product of two 2nd order tensors ******
+          do i=1,ncomp
+             do j=1,ncomp
+                  d(i,j)  = c_three(i)*b(j)
+             end do
+          end do
+
+c**** Tangent stiffness *****
+          do i = 1,mcomp
+              do j = 1,mcomp
+                  C_T(i,j) = a(i,j) - d(i,j)
+              end do
+          end do
+
+
+      endif
+      
+      ustatev(1) = damage
 	
-c *** Update stress 
+c *** Update stress i
       do i=1,ncomp
          stress(i) = sigma(i)
-	end do
-     
-	
-	return
+      end do
+      
+**********Restore stiffness tensor as 6*6 matrix***********
+       if (T_strain(1) < epsilon_f) then      
+          do i = 1,mcomp
+               do j = 1,mcomp
+                   dsdePl(i,j) =  (ONE + eta- damage)*dsdeEl(i,j)
+               end do
+          end do    
+       else 
+          do i = 1,mcomp
+               do j = 1,mcomp
+                   dsdePl(i,j) = C_T(i,j)
+               end do
+          end do
+      endif    
+      
+
+
+c
+      return
       end
  
       
 
-c************  Subroutine for dyadic product of two secind order tensors   **********      
-	subroutine t2_dyad_t2(Kappa,id,c2)
-        double precision Kappa
-        double precision c2(3,3,3,3)
-        double precision id(3,3)
-        integer i,j,k,l,n
-        n = 3
-        
-
-
-	   
-         do i = 1,n
-             do j = 1,n
-			   do k=1,n
-				   do l=1,n
-						c2(i,j,k,l) = Kappa*id(i,j)*id(k,l)
-				   end do
-                end do
-		   end do
-	   end do
-	  
-	  return
-      end
-
-      
-c************  Subroutine for P4sym term  **********      
-	subroutine getP4sym(mu,id,I4sym,c1)
-        double precision mu
-        double precision c1(3,3,3,3),I4sym(3,3,3,3)
-        double precision id(3,3)
-        integer i,j,k,l,n
-        n = 3
-                 
-
-
-        
-        do i = 1,n
-           do j = 1,n
-               do k=1,n
-                   do l=1,n
-                      I4sym(i,j,k,l) = (0.5)*(id(i,k)*id(j,l)
-     &                 +id(i,l)*id(j,k))
-                  end do
-              end do
-          end do
-        end do
-       
-        do i = 1,n
-          do j = 1,n
-              do k=1,n
-                  do l=1,n
-                      c1(i,j,k,l) = 2*mu*(I4sym(i,j,k,l)-
-     &                      (0.33)*(id(i,j)*id(k,l)))
-                  end do
-              end do
-           end do
-        end do      
-
-	  
-	  return
-	  end
-	
-
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
       
       
       

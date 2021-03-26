@@ -117,7 +117,8 @@ c
 	
       EXTERNAL         vzero, vmove, get_ElmData
       DOUBLE PRECISION  dsdeEl(mcomp,mcomp), sigma(mcomp),
-     &                  sigi (mcomp), strains(mcomp)
+     &                  sigi (mcomp), strains(mcomp), 
+     &                  sigi2(mcomp)
 
       
 	DOUBLE PRECISION    var0, var1, var2, var3, var4, var5,
@@ -201,8 +202,12 @@ c *** define tsstif(1) since it is used for calculation of hourglass stiffness
 c *** get initial stress
       call vzero(sigi(1),ncomp)
       i = ncomp
-      call get_ElmData ('ISIG', elemId,kDomIntPt, i, sigi)
+      call get_ElmData ('GEOM', elemId,kDomIntPt, i, sigi)
 
+      
+      do i=1,ncomp
+         sigi2(i) = sigi(i) 
+      end do
       	
 c *** calculate the trial stress and
 c     copy elastic moduli dsdeEl to material Jacobian matrix
@@ -220,7 +225,6 @@ c     copy elastic moduli dsdeEl to material Jacobian matrix
             dsdePl(j,i) = dsdeEl(j,i)
             sigma(i) = sigma(i) + dsdeEl(j,i)*strains(j)
          end do
-         sigma(i)  =  sigma(i) + sigi(i)
       end do
 
       do i=1,ncomp
