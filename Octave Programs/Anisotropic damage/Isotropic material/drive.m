@@ -18,15 +18,7 @@ addpath('tensor/');
 addpath('analyt_sol/'); 
 %format long;
 %
-% strain amplitude in terms of multiple of normalized yield stress
-% strain_ampl=sigma_y0/2/mu*n_ampl/(1-q_el)
-n_ampl=3;      % n_ampl>1
-%
-mat_param = inputmat();
-xE = mat_param(1); xnu = mat_param(2); sigma_y0 = mat_param(3);
-mu = xE/(2*(1+xnu)); kappa = xE/(3*(1-2*xnu));
-q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
-%
+
 %--------------------------------------------------------------------------
 %   define loading
 %--------------------------------------------------------------------------
@@ -38,7 +30,7 @@ q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.002];
+    lam=[0 0.003];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -68,8 +60,8 @@ e11=loading(ltype,dt,t,lam);
 
 % initialize strains, temperature and internal variables
 epsbar=zeros(5,1);
-sdv = zeros(1,steps);
-sdv(1,1)=0; 
+sdv = zeros(3,steps);
+
 
 % initialise quantities for post-processing
 s11=zeros(1,steps);
@@ -95,7 +87,7 @@ for n=1:steps
     % iterations to zero
     sbar=ones(5,1);
     iter=0;
-    
+
     while norm(sbar) > tol % check convergence
         iter = iter+1;
         if iter > maxit
@@ -105,6 +97,7 @@ for n=1:steps
         
         % 1.) total deformation
          epsilon(1,1) = e11(n+1);
+
          
          epsilon(2:6,1) = epsbar;
          
@@ -135,18 +128,17 @@ end % for
 fprintf('********************\n')
 close(wb)
 %
-time
-s11
-fprintf('eps11 %f\n', e11);
+
+%fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
 
-data = [time; e11; s11; eps22];
+data = [time; e11; s11; eps22; eps33];
 
 fileID = fopen('output.txt','w');
-fprintf(fileID,'%2s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}');
+fprintf(fileID,'%4s %15s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}','Epsilon_{33}');
 fprintf(fileID,'%25s\n','');
-fprintf(fileID,'%3.1f %15.4f %15.5f %15.4f\n',data);
+fprintf(fileID,'%4.1f %15.4f %15.5f %15.6f %15.6f\n',data);
 fclose(fileID);
 
 figure(1)

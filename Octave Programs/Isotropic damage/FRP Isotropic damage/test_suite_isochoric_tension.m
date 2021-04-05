@@ -4,13 +4,7 @@ clear all;
 % isochoric tension (fully-deformation controlled test, ramp function)
 % *************************************************************************
 %
-% strain amplitude in terms of multiple of normalized yield stress
-% strain_ampl=sigma_y0/2/mu*n_ampl
-n_ampl=2;      % n_ampl>1
-%
-mat_param = inputmat();
-xE = mat_param(1); xnu = mat_param(4); sigma_y0 = mat_param(10);
-mu = xE/(2*(1+xnu));
+
 %
 % define loading
 % 1: linear ramping of load
@@ -18,7 +12,7 @@ ltype=1;
 dt=0.1;
 if ltype==1
     t=[0 10];
-    lam=[0 n_ampl*sigma_y0/2/mu];
+    lam=[0 0.05];
 end
 %disp(lam);
 %

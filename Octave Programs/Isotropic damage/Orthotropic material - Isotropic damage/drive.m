@@ -18,14 +18,7 @@ addpath('tensor/');
 addpath('analyt_sol/'); 
 %format long;
 %
-% strain amplitude in terms of multiple of normalized yield stress
-% strain_ampl=sigma_y0/2/mu*n_ampl/(1-q_el)
-n_ampl=3;      % n_ampl>1
-%
-mat_param = inputmat();
-xE = mat_param(1); xnu = mat_param(4); sigma_y0 = mat_param(10);
-mu = xE/(2*(1+xnu)); kappa = xE/(3*(1-2*xnu));
-q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
+
 %
 %--------------------------------------------------------------------------
 %   define loading
@@ -35,10 +28,10 @@ q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=3;
+ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.14];
+    lam=[0 0.05];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -76,7 +69,7 @@ s11=zeros(1,steps);
 eps22=zeros(1,steps); eps33=zeros(1,steps);
 
 % tolerance and maximum no. of iterations for Newton iteration
-tol=1e-7;
+tol=1e-10;
 maxit=100;
 ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
@@ -105,11 +98,10 @@ for n=1:steps
         
         % 1.) total deformation
          epsilon(1,1) = e11(n+1);
-         epsilon(1,1)
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=vmises(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=vmises_matrix(epsilon,sdv(:,n),ttype);
         
         % 3.) partitioning
         sbar=partition(s);
@@ -135,6 +127,13 @@ end % for
 fprintf('********************\n')
 close(wb)
 %
+data = [time; e11; s11; eps22];
+
+fileID = fopen('output_tan.txt','w');
+fprintf(fileID,'%2s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}');
+fprintf(fileID,'%25s\n','');
+fprintf(fileID,'%2.1f %15.4f %15.5f %15.4f\n',data);
+fclose(fileID);
 
 figure(1)
 %subplot(2,1,1)

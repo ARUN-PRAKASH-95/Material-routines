@@ -154,18 +154,18 @@ ylabel('e11')
 figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'r-')
+plot(e11,s11,'color','r')
 legend('\sigma_{11}','Ref.','Location','NorthWest')
 xlabel('eps11')
 ylabel('sig11')
  
-
+%'-o',
  
  % plot lateral strains
 figure(3)
-plot(e11,eps22,'b-')
+plot(e11,eps22,'color','b')
 hold on
-plot(e11,eps33,'g-')
+plot(e11,eps33,'color','g')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
 xlabel('eps11')
 ylabel('eps22, eps33')
@@ -173,7 +173,7 @@ ylabel('eps22, eps33')
 
 % plot damage
 figure(4)
-plot(e11,sdv(1,:),'r-')
+plot(e11,sdv(1,:))
 legend('damage','Ref.','Location','West')
 xlabel('eps11')
 ylabel('damage')

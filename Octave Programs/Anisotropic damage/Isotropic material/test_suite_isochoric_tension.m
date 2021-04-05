@@ -3,15 +3,9 @@ clear all;
 % test suite for three-dimensional von Mises plasticity 
 % isochoric tension (fully-deformation controlled test, ramp function)
 % *************************************************************************
-%
-% strain amplitude in terms of multiple of normalized yield stress
-% strain_ampl=sigma_y0/2/mu*n_ampl
-n_ampl=2;      % n_ampl>1
-%
-mat_param = inputmat();
-xE = mat_param(1); xnu = mat_param(2); sigma_y0 = mat_param(3);
-mu = xE/(2*(1+xnu));
-%
+
+
+
 % define loading
 % 1: linear ramping of load
 ltype=1;
@@ -38,7 +32,7 @@ steps=size(time,2)-1;
 e11=loading(ltype,dt,t,lam);
 %
 % initialize internal variables
-sdv=zeros(1,steps);
+sdv=zeros(3,steps);
 %
 % initialise quantities for post-processing
 s11=zeros(1,steps); s22=zeros(1,steps); s33=zeros(1,steps);
@@ -86,4 +80,20 @@ clf;
 hold on
 plot(e11,sdv(1,:),'r-')
 xlabel('\epsilon_{11}','FontSize',12)
-ylabel('Damage','FontSize',12)
+ylabel('d1','FontSize',12)
+
+
+figure(3)
+clf;
+hold on
+plot(e11,sdv(2,:),'r-')
+xlabel('\epsilon_{11}','FontSize',12)
+ylabel('d2','FontSize',12)
+
+
+figure(4)
+clf;
+hold on
+plot(e11,sdv(3,:),'r-')
+xlabel('\epsilon_{11}','FontSize',12)
+ylabel('d3','FontSize',12)
