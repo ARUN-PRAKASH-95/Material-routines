@@ -30,7 +30,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.003];
+    lam=[0 0.002];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -68,9 +68,9 @@ s11=zeros(1,steps);
 eps22=zeros(1,steps); eps33=zeros(1,steps);
 
 % tolerance and maximum no. of iterations for Newton iteration
-tol=1e-5;
+tol=1e-10;
 maxit=100;
-ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');

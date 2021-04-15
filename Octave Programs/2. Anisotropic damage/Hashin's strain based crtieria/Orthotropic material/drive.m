@@ -6,8 +6,8 @@
 % 
 %==========================================================================
 % 
-%   coded by: B. Kiefer 15 Nov 2011
-%   analytical solution added: S. Prueger 10 Dec 2018
+
+
 %
 %   comments: --> numerical tangent moduli computation for ttype = 1
 %
@@ -50,7 +50,7 @@ end
 %--------------------------------------------------------------------------
 
 % prescribed load/time step
-dt=0.1;
+dt=2;
 % start and end-time of loading, time-scale, no. of steps
 ta=t(1);
 te=t(end);
@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine1(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -115,8 +115,8 @@ for n=1:steps
         disp(['|sbar| = ', num2str(norm(sbar))])
         
     end % while
-    s
-    
+   
+   
     % update of internal variables after obtaining convergence
     sdv(:,n+1) = sdvup;
     
@@ -135,11 +135,12 @@ close(wb)
 
 data = [time; e11; s11; eps22; eps33;];
 
-fileID = fopen('output.txt','w');
+fileID = fopen('output1.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}','Epsilon_{33}');
 fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%3.1f %15.5f %15.5f %15.5f %15.5f\n',data);
 fclose(fileID);
+
 
 figure(1)
 %subplot(2,1,1)

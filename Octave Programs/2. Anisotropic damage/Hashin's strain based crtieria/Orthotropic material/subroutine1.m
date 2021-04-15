@@ -1,4 +1,4 @@
-function [sig6,A66,sdvl]=subroutine(eps6,sdvl,ttype)
+function [sig6,A66,sdvl]=subroutine1(eps6,sdvl,ttype)
 
 
 
@@ -107,7 +107,7 @@ vec = [1,2,3,4,5,6];
 
 PD_C = vec*C*vec';
 
-eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta))
+eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_11_f_c = sig_11_f_c / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_22_f_t = sig_22_f_t / ((1 -zx_xz) / (young_x*young_z*delta));
 eps_22_f_c = sig_22_f_c / ((1 -zx_xz) / (young_x*young_z*delta));
@@ -135,11 +135,11 @@ endif
 
 if eps(2)+eps(3) >= 0 
   
-  F_m_new  =   sqrt(((eps(2)+eps(3))**2/(eps_22_f_t*eps_33_f_t)) -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2);
+  F_m_new  =   ((eps(2)+eps(3))**2/(eps_22_f_t*eps_33_f_t)) -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2;
  
 elseif eps(2)+eps(3) < 0
   
-  F_m_new  =  sqrt(((eps(2)+eps(3))**2/(eps_22_f_c*eps_33_f_c)) + ((eps(2)+eps(3)/eps_22_f_c)*( (eps_22_f_c/2*eps_12_f)  - 1))   -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2);
+  F_m_new  =  ((eps(2)+eps(3))**2/(eps_22_f_c*eps_33_f_c)) + ((eps(2)+eps(3)/eps_22_f_c)*( (eps_22_f_c/2*eps_12_f)  - 1))   -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2;
 
 endif
 
@@ -187,7 +187,7 @@ sig6 = zeros(6,1);
 
 %%%%%%%%  Check whether damage has initiated or not  %%%%%%%%%
 
-if F_f**2<1 && F_m**2<1 && F_z**2<1
+if F_f**2<1 && F_m<1 && F_z**2<1
   
     % Compute stress using Hookes law  %
     for i = 1:6
@@ -256,9 +256,9 @@ else
     endif
     
     
-    if F_m**2 > 1
+    if F_m > 1
        
-      d2_new = 1  - ((exp(k2*(F_m - 1)))/F_m);     %d2
+      d2_new = 1  - ((exp(k2*(sqrt(F_m) - 1)))/sqrt(F_m));     %d2
       
       if d2_new > d2
           d2 = d2_new;
@@ -281,9 +281,9 @@ else
       end
       
     endif
-    %d1
-    %d2
-    %d3
+    d1
+    d2
+    d3
     
     
     %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%
@@ -324,7 +324,7 @@ else
     C_d(6,4) = 0;
     C_d(6,5) = 0;
     C_d(6,6) = g_xz*(1 - d3)*(1 - d2);
-    C_d;
+    C_d
     
     vec = [1,2,3,4,5,6];
     
@@ -416,7 +416,7 @@ else
         term2  =  (2*(eps(2) + eps(3))/(eps_22_f_t*eps_33_f_t))  -  (eps(2)/eps_23_f**2);
         
         
-        C_T_2_b  = [0; 0.5*((1 - k2*F_m)/(F_m**3))*exp(k2*(F_m - 1))*term1; 0.5*((1 - k2*F_m)/(F_m**3))*exp(k2*(F_m - 1))*term2; ((1 - k2*F_m)/(F_m**3 * eps_12_f**2))*exp(k2*(F_m - 1))*eps(4); ((1 - k2*F_m)/(F_m**3 * eps_13_f**2))*exp(k2*(F_m - 1))*eps(5); ((1 - k2*F_m)/(F_m**3 * eps_23_f**2))*exp(k2*(F_m - 1))*eps(6);];
+        C_T_2_b  = [0; 0.5*((1 - k2*sqrt(F_m))/(sqrt(F_m)**3))*exp(k2*(sqrt(F_m) - 1))*term1; 0.5*((1 - k2*sqrt(F_m))/(sqrt(F_m)**3))*exp(k2*(sqrt(F_m) - 1))*term2; ((1 - k2*sqrt(F_m))/(sqrt(F_m)**3 * eps_12_f**2))*exp(k2*(sqrt(F_m) - 1))*eps(4); ((1 - k2*sqrt(F_m))/(sqrt(F_m)**3 * eps_13_f**2))*exp(k2*(sqrt(F_m) - 1))*eps(5); ((1 - k2*sqrt(F_m))/(sqrt(F_m)**3 * eps_23_f**2))*exp(k2*(sqrt(F_m) - 1))*eps(6);];
         
 
       %%%%%   For Compression  %%%%%%  
@@ -428,7 +428,7 @@ else
         term2 =  ((2*(eps(2) + eps(3))/(eps_22_f_c*eps_33_f_c))  +  ((eps_22_f_c/(2*eps_12_f)) - 1)/eps_22_f_c   -  (eps(2)/eps_23_f**2))/(2*F_m);
 
 
-        C_T_2_b  =  [0;  ((1 - k2*F_m)/(F_m**2))*exp(k2*(F_m - 1))*term1; ((1 - k2*F_m)/(F_m**2))*exp(k2*(F_m - 1))*term2; ((1 - k2*F_m)/(F_m**3 * eps_12_f**2))*exp(k2*(F_m - 1))*eps(4); ((1 - k2*F_m)/(F_m**3 * eps_13_f**2))*exp(k2*(F_m - 1))*eps(5); ((1 - k2*F_m)/(F_m**3 * eps_23_f**2))*exp(k2*(F_m - 1))*eps(6);];
+        C_T_2_b  =  [0;  ((1 - k2*sqrt(F_m))/(sqrt(F_m)**2))*exp(k2*(sqrt(F_m) - 1))*term1; ((1 - k2*sqrt(F_m))/(sqrt(F_m)**2))*exp(k2*(sqrt(F_m) - 1))*term2; ((1 - k2*sqrt(F_m))/(sqrt(F_m)**3 * eps_12_f**2))*exp(k2*(sqrt(F_m) - 1))*eps(4); ((1 - k2*sqrt(F_m))/(sqrt(F_m)**3 * eps_13_f**2))*exp(k2*(sqrt(F_m)- 1))*eps(5); ((1 - k2*sqrt(F_m))/(sqrt(F_m)**3 * eps_23_f**2))*exp(k2*(sqrt(F_m) - 1))*eps(6);];
           
       endif
 
@@ -533,7 +533,7 @@ elseif ttype == 1
         %recursiv call of your material routine with ttype=0 to avoid
         %endless loop
         %Calculate perturbed stress, sdv are not overwritten
-        [sig6per,Adummy,sdvldummy] = subroutine(epsper,sdvl,0);
+        [sig6per,Adummy,sdvldummy] = subroutine1(epsper,sdvl,0);
         %Simple differential quotient
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         
