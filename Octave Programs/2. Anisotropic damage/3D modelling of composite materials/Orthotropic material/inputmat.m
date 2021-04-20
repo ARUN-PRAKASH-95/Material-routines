@@ -13,11 +13,11 @@ matp(8)  = 3000e6;            % Shear_mod_yz
 matp(9)  = 5500e6;            % Shear_mod_xz
 
 matp(10) = 2500e6;            % Longitudinal tensile strength
-matp(11) = -2000e6;            % Longitudinal compressive strength
+matp(11) = 2500e6;            % Longitudinal compressive strength
 matp(12) = 50e6;              % Transverse tensile strength
-matp(13) = -150e6;             % Transverse compressive strength
+matp(13) = 150e6;             % Transverse compressive strength
 matp(14) = 50e6;              % Shear strength
-matp(15) = 10000000%12.5e3;            % Longitudinal Tensile fracture energy
+matp(15) = 12.5e3;            % Longitudinal Tensile fracture energy
 matp(16) = 12.5e3;            % Longitudinal Compressive fracture energy
 matp(17) = 1e3;               % Transverse tensile fracture energy
 matp(18) = 1e3;               % Transverse compressive fracture energy

@@ -108,7 +108,7 @@ c
 	
 ********* USER DEFINED VARIABLES (FOR CALCULATION PURPOSE) **********	
 	
-      integer :: mcomp
+      integer :: mcomp, twenty
       double precision :: HALF, ONE, TWO, ZERO,
      &                    THREE
       
@@ -118,9 +118,9 @@ c
      &                 TWO        = 2.d0,
      &                 THREE      = 3.d0,
      &                 mcomp      = 6
-     &                 )
+     &                        )
 	
-      EXTERNAL          vzero, vmove, get_ElmData
+      EXTERNAL          vzero, vmove, get_ElmData, engget
 
    
       double precision  dsdeEl(mcomp,mcomp), sigma(mcomp),
@@ -132,11 +132,11 @@ c
      &                  d_C_d_d2(mcomp,mcomp), C_T_2_a(mcomp),
      &                  C_T_2_b(mcomp),C_T_3(mcomp,mcomp), 
      &                  d_C_d_d3(mcomp,mcomp), C_T_3_a(mcomp),
-     &                  C_T_3_b(mcomp)
+     &                  C_T_3_b(mcomp),value(6)
                   
 
       
-      integer             i,j,k,l,n,P
+      integer             i,j,k,l,n,P,ielem
       double precision    young_x, young_y, young_z,  
      &                    pr_xy, pr_yz, pr_xz, L_c,k1,k2,k3,
      &                    xK, yield,G_c_1,G_c_2,G_c_3,
@@ -148,7 +148,8 @@ c
       double precision    d3_new,F_f,F_m,F_z,term1,term2,g_xy, g_yz, 
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
-     &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f
+     &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
+     &                    F_m_new,F_z_new,V
 
       
       
@@ -196,7 +197,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_12_f   = 50e6
       sig_13_f   = 50e6
       sig_23_f   = 50e6
-      G_c_1      = 12.5e3
+      G_c_1      = 10000000
       G_c_2      = 1e3
       G_c_3      = 1e3
       L_c        = 1**(1/3)
@@ -221,6 +222,9 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       d1   = ustatev(1)
       d2   = ustatev(2)
       d3   = ustatev(3)
+      F_f  = ustatev(4)
+      F_m  = ustatev(5)
+      F_z  = ustatev(6)
 	
 
 
@@ -293,12 +297,12 @@ c****Damage initiation criteria
       if (T_strain(1) >= 0) then
           
           
-          F_f = SQRT((T_strain(1)/eps_11_f_t)**2 + (T_strain(4) 
+          F_f_new = SQRT((T_strain(1)/eps_11_f_t)**2 + (T_strain(4) 
      &       /eps_12_f)**2   + (T_strain(5)/eps_13_f)**2)
           
       else 
           
-          F_f = SQRT((T_strain(1)/eps_11_f_c)**2)
+          F_f_new = SQRT((T_strain(1)/eps_11_f_c)**2)
   
       endif
       
@@ -306,7 +310,7 @@ c****Damage initiation criteria
       
       if (T_strain(2) + T_strain(3)>= 0)  then
           
-          F_m =   ((T_strain(2) + T_strain(3))**2/(eps_22_f_t
+          F_m_new =   ((T_strain(2) + T_strain(3))**2/(eps_22_f_t
      &    *eps_33_f_t)) -  (T_strain(2)*T_strain(3)/eps_23_f**2) +  
      &    (T_strain(4)/eps_12_f)**2 + (T_strain(5)/eps_13_f)**2 +
      &     (T_strain(6)/eps_23_f)**2  
@@ -314,7 +318,7 @@ c****Damage initiation criteria
       
       else
           
-          F_m =   ((T_strain(2) + T_strain(3))**2/(eps_22_f_c
+          F_m_new =   ((T_strain(2) + T_strain(3))**2/(eps_22_f_c
      &    *eps_33_f_c)) + ((T_strain(2)+T_strain(3)/eps_22_f_c)  
      &    *((eps_22_f_c/2*eps_12_f)  - ONE)) -  
      &    (T_strain(2)*T_strain(3)/eps_23_f**2) +  
@@ -328,17 +332,48 @@ c****Damage initiation criteria
       
       if (T_strain(3) >= 0 )then
       
-          F_z = SQRT((T_strain(3)/eps_33_f_t)**2 + (T_strain(5) 
+          F_z_new = SQRT((T_strain(3)/eps_33_f_t)**2 + (T_strain(5) 
      &   /eps_13_f)**2  + (T_strain(6)/eps_23_f)**2) 
           
       else 
       
-          F_z = SQRT((T_strain(3)/eps_33_f_c)**2 + (T_strain(5) 
+          F_z_new = SQRT((T_strain(3)/eps_33_f_c)**2 + (T_strain(5) 
      &   /eps_13_f)**2  + (T_strain(6)/eps_23_f)**2)
           
           
       endif
       
+      
+      
+      if (F_f_new >= F_f) then
+          
+          F_f = F_f_new
+          
+      else
+          
+          F_f = F_f
+          
+      endif
+      
+      if (F_m_new >= F_m) then
+          
+          F_m = F_m_new
+          
+      else
+          
+          F_m = F_m
+          
+      endif
+          
+      if (F_z_new >= F_z) then
+          
+          F_z = F_z_new
+          
+      else
+          
+          F_z = F_z
+          
+      endif
       
       
       call vzero(sigma, 6)
@@ -379,7 +414,7 @@ c****Damage initiation criteria
         
         if (F_f**2 >= 1) then
       
-          d1_new =  ONE  - (exp(k2*(F_f - ONE)))/F_f
+          d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f
       
           if (d1_new > d1) then
               d1 = d1_new
@@ -706,6 +741,9 @@ c****Damage initiation criteria
       ustatev(1) = d1
       ustatev(2) = d2
       ustatev(3) = d3
+      ustatev(4) = F_f
+      ustatev(5) = F_m
+      ustatev(6) = F_z
       
 c *** Update stress i
       do i=1,ncomp

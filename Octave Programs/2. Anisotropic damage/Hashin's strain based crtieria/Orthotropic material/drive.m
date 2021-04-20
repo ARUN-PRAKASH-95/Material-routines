@@ -32,7 +32,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.1];
+    lam=[0 0.5];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -50,7 +50,7 @@ end
 %--------------------------------------------------------------------------
 
 % prescribed load/time step
-dt=2;
+dt=0.02;
 % start and end-time of loading, time-scale, no. of steps
 ta=t(1);
 te=t(end);
@@ -115,7 +115,7 @@ for n=1:steps
         disp(['|sbar| = ', num2str(norm(sbar))])
         
     end % while
-   
+    epsilon
    
     % update of internal variables after obtaining convergence
     sdv(:,n+1) = sdvup;

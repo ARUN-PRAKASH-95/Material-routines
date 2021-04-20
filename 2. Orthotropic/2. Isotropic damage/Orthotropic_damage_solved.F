@@ -169,9 +169,9 @@ c
 	pr_xy    = prop(4)
 	pr_yz    = prop(5)
 	pr_xz    = prop(6)
-	g_xy     = 4700e6
-	g_yz     = 4700e6
-	g_xz     = 4700e6
+	g_xy     = 5500e6
+	g_yz     = 3000e6
+	g_xz     = 5500e6
 	
 	
       yield    = 1250e6
@@ -217,21 +217,21 @@ c
 	dsdeEl(4,1) = 0
 	dsdeEl(4,2) = 0 
 	dsdeEl(4,3) = 0
-	dsdeEl(4,4) = TWO * g_yz
+	dsdeEl(4,4) = g_xy
 	dsdeEl(4,5) = 0
 	dsdeEl(4,6) = 0
 	dsdeEl(5,1) = 0
 	dsdeEl(5,2) = 0 
 	dsdeEl(5,3) = 0
 	dsdeEl(5,4) = 0
-	dsdeEl(5,5) = TWO * g_xz
+	dsdeEl(5,5) = g_yz
 	dsdeEl(5,6) = 0
 	dsdeEl(6,1) = 0
 	dsdeEl(6,2) = 0 
 	dsdeEl(6,3) = 0
 	dsdeEl(6,4) = 0
 	dsdeEl(6,5) = 0
-	dsdeEl(6,6) = TWO * g_xy
+	dsdeEl(6,6) =  g_xz
 
 	
 	

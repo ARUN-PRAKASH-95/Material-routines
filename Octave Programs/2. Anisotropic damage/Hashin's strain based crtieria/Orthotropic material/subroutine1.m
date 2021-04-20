@@ -60,7 +60,7 @@ d3  = sdvl(3);
 F_f = sdvl(4);
 F_m = sdvl(5);
 F_z = sdvl(6);
-
+eta = 0;
 
 
 
@@ -129,7 +129,6 @@ elseif eps(1) < 0
   F_f_new  =  sqrt((eps(1)/eps_11_f_c)**2);
   
 endif
-
 
 
 
@@ -237,14 +236,16 @@ else
       k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3;
       
     endif   
-
+    k1
+    k2
+    k3
    
     
     %%%%%%%% Damage evolution equations  %%%%%%%%%%
     
     if F_f**2 > 1
       
-      d1_new =  1  - ((exp(k1*(F_f - 1)))/F_f);     %d1
+      d1_new =  1+eta  - ((exp(k1*(F_f - 1)))/F_f);     %d1
 
        
       if d1_new > d1
@@ -258,7 +259,7 @@ else
     
     if F_m > 1
        
-      d2_new = 1  - ((exp(k2*(sqrt(F_m) - 1)))/sqrt(F_m));     %d2
+      d2_new = 1+eta  - ((exp(k2*(sqrt(F_m) - 1)))/sqrt(F_m));     %d2
       
       if d2_new > d2
           d2 = d2_new;
@@ -272,7 +273,7 @@ else
     
     if F_z**2 > 1
       
-      d3_new = 1  - (exp(k3*(F_z - 1))/F_z);     %d3
+      d3_new = 1+eta  - (exp(k3*(F_z - 1))/F_z);     %d3
       
       if d3_new > d3
           d3 = d3_new;
@@ -324,7 +325,7 @@ else
     C_d(6,4) = 0;
     C_d(6,5) = 0;
     C_d(6,6) = g_xz*(1 - d3)*(1 - d2);
-    C_d
+    C_d;
     
     vec = [1,2,3,4,5,6];
     
@@ -509,7 +510,7 @@ else
     
   
 endif
-  
+sig6 
   
   
   

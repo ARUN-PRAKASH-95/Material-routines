@@ -16,17 +16,7 @@ close all
 clc
 addpath('tensor/'); 
 addpath('analyt_sol/'); 
-%format long;
-%
-% strain amplitude in terms of multiple of normalized yield stress
-% strain_ampl=sigma_y0/2/mu*n_ampl/(1-q_el)
-n_ampl=3;      % n_ampl>1
-%
-mat_param = inputmat();
-xE = mat_param(1); xnu = mat_param(2); sigma_y0 = mat_param(3);
-mu = xE/(2*(1+xnu)); kappa = xE/(3*(1-2*xnu));
-q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
-%
+
 %--------------------------------------------------------------------------
 %   define loading
 %--------------------------------------------------------------------------
@@ -38,7 +28,7 @@ q_el=-0.5*(kappa-2/3*mu)/(kappa+1/3*mu);
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.002];
+    lam=[0 0.02];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -56,7 +46,7 @@ end
 %--------------------------------------------------------------------------
 
 % prescribed load/time step
-dt=0.1;
+dt=1;
 % start and end-time of loading, time-scale, no. of steps
 ta=t(1);
 te=t(end);
@@ -109,7 +99,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=vmises(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine(epsilon,sdv(:,n),ttype);
         
         % 3.) partitioning
         sbar=partition(s);
