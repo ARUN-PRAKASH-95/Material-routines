@@ -141,7 +141,7 @@ elseif eps(2)+eps(3) < 0
   F_m_new  =  ((eps(2)+eps(3))**2/(eps_22_f_c*eps_33_f_c)) + ((eps(2)+eps(3)/eps_22_f_c)*( (eps_22_f_c/2*eps_12_f)  - 1))   -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2;
 
 endif
-
+((eps(2)+eps(3))**2/(eps_22_f_c*eps_33_f_c)) + ((eps(2)+eps(3)/eps_22_f_c)*( (eps_22_f_c/2*eps_12_f)  - 1))   -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2
 
 
 if eps(3) >= 0
@@ -224,7 +224,7 @@ else
       k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2;
   
     endif
-
+    
     
     
     if eps(3) >= 0

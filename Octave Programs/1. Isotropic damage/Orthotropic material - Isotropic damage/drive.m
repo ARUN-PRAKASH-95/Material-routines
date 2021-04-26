@@ -49,7 +49,7 @@ end
 %--------------------------------------------------------------------------
 
 % prescribed load/time step
-dt=1;
+dt=0.1;
 % start and end-time of loading, time-scale, no. of steps
 ta=t(1);
 te=t(end);
