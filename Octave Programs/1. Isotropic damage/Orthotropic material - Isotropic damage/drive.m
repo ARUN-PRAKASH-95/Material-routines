@@ -31,7 +31,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.05];
+    lam=[0 0.2];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -62,7 +62,7 @@ e11=loading(ltype,dt,t,lam);
 % initialize strains, temperature and internal variables
 epsbar=zeros(5,1);
 sdv = zeros(1,steps);
-sdv(1,1)=0; 
+
 
 % initialise quantities for post-processing
 s11=zeros(1,steps);
@@ -101,7 +101,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_new(epsilon,sdv(:,n),ttype);
         
         % 3.) partitioning
         sbar=partition(s);
@@ -129,7 +129,7 @@ close(wb)
 %
 data = [time; e11; s11; eps22];
 
-fileID = fopen('output.txt','w');
+fileID = fopen('output_new.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}');
 fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%2.1f %15.4f %15.5f %15.4f\n',data);
@@ -146,26 +146,27 @@ ylabel('e11')
 figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'r-')
-legend('\sigma_{11}','Ref.','Location','NorthWest')
-xlabel('eps11')
-ylabel('sig11')
+plot(e11,s11,'or-')
+legend('\sigma_{11}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{11} ')
+ylabel('\sigma_{11}(N/m^2)')
  
 
  
  % plot lateral strains
 figure(3)
-plot(e11,eps22,'b-')
+plot(e11,eps22,'ob-')
 hold on
-plot(e11,eps33,'g-')
+plot(e11,eps33,'og-')
+title('Computed using Numerical Pertubration')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
-xlabel('eps11')
-ylabel('eps22, eps33')
+xlabel('\epsilon_{11}')
+ylabel('\epsilon_{22},\epsilon_{33}')
 
 
 % plot damage
 figure(4)
-plot(e11,sdv(1,:),'r-')
+plot(e11,sdv(1,:),'or-')
 legend('damage','Ref.','Location','West')
 xlabel('eps11')
 ylabel('damage')

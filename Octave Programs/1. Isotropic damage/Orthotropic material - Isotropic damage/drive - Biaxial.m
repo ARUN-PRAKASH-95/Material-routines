@@ -28,7 +28,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.05];
+    lam=[0 0.2];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -46,7 +46,7 @@ end
 %--------------------------------------------------------------------------
 
 % prescribed load/time step
-dt=1;
+dt=0.1;
 % start and end-time of loading, time-scale, no. of steps
 ta=t(1);
 te=t(end);
@@ -60,7 +60,6 @@ e22=loading(ltype,dt,t,lam);
 % initialize strains, temperature and internal variables
 epsbar=zeros(4,1);
 sdv = zeros(1,steps);
-sdv(1,1)=0; 
 
 % initialise quantities for post-processing
 s11 =zeros(1,steps);
@@ -149,46 +148,39 @@ plot(time,e11)
 xlabel('time')
 ylabel('e11')
 
-figure(2)
-%subplot(2,1,1)
-plot(time,e22)
-xlabel('time')
-ylabel('e22')
 
-
+% plot stress-strain response
+figure(2);
+ %subplot(2,1,2)
+ %plot(e11,s11, paperX,paperY, '-.rx')
+plot(e11,s11,'or-')
+legend('\sigma_{11}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{11}')
+ylabel('\sigma_{11}')
+ 
 % plot stress-strain response
 figure(3);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'r-')
-legend('\sigma_{11}','Ref.','Location','NorthWest')
-xlabel('eps11')
-ylabel('sig11')
-
-
-% plot stress-strain response
-figure(4);
- %subplot(2,1,2)
- %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e22,s22,'r-')
-legend('\sigma_{22}','Ref.','Location','NorthWest')
-xlabel('eps22')
-ylabel('sig22')
- 
+plot(e22,s22,'or-')
+legend('\sigma_{22}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{22}')
+ylabel('\sigma_{22}')
 
  
  % plot lateral strains
-figure(5)
-plot(e11,eps33,'g-')
-legend('\epsilon_{22}','Ref.','Location','NorthEast')
-xlabel('eps11')
-ylabel('eps33')
+figure(4)
+plot(e11,eps33,'og-')
+legend('\epsilon_{33}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{11}')
+ylabel('\epsilon_{33}')
 
 
 % plot damage
-figure(6)
-plot(e11,sdv(1,:),'r-')
+figure(5)
+plot(e11,sdv(1,:),'or-')
 legend('damage','Ref.','Location','West')
-xlabel('eps11')
+xlabel('\epsilon_{11}')
 ylabel('damage')
+
 

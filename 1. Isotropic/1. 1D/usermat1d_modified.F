@@ -140,7 +140,6 @@ c
 c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       young    = prop(1)
       posn     = prop(2)
-      sigy0    = prop(3)   
       twoG     = young / (ONE+posn)
 
 c *** define tsstif(1) since it is used for calculation of hourglass stiffness
@@ -149,7 +148,7 @@ c *** define tsstif(1) since it is used for calculation of hourglass stiffness
       
 c *** calculate elastic stiffness matrix 
 c
-      dsdeEl(1,1)  = young
+      dsdeEl(1,1)  = young*1000
       dsdePl (1,1) = dsdeEl(1,1)
       stress(1)    = dsdeEl(1,1) * (Strain(1)+dStrain(1))
 
@@ -158,6 +157,5 @@ c
 c ***   Elastic work
       sedEl = HALF * stress(1) * (Strain(1)+dStrain(1))
 
-	ustatev(nStatev) = sigy
       return
       end

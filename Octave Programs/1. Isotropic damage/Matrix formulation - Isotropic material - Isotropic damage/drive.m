@@ -16,7 +16,10 @@ close all
 clc
 addpath('tensor/'); 
 addpath('analyt_sol/'); 
+%format long;
+%
 
+%
 %--------------------------------------------------------------------------
 %   define loading
 %--------------------------------------------------------------------------
@@ -28,13 +31,13 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.02];
+    lam=[0 0.01];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
 elseif ltype==3
     t=[0 5 10];
-    lam=[0 0.0015 0.0000];
+    lam=[0 0.04 0.0000];
 elseif ltype==4
     t=[0 2.5 7.5 10];
     lam=[0 n_ampl*sigma_y0/2/mu/(1-q_el) -n_ampl*sigma_y0/2/mu/(1-q_el)];
@@ -46,7 +49,7 @@ end
 %--------------------------------------------------------------------------
 
 % prescribed load/time step
-dt=1;
+dt=0.1;
 % start and end-time of loading, time-scale, no. of steps
 ta=t(1);
 te=t(end);
@@ -66,9 +69,9 @@ s11=zeros(1,steps);
 eps22=zeros(1,steps); eps33=zeros(1,steps);
 
 % tolerance and maximum no. of iterations for Newton iteration
-tol=1e-10;
+tol=1e-7;
 maxit=100;
-ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -95,7 +98,6 @@ for n=1:steps
         
         % 1.) total deformation
          epsilon(1,1) = e11(n+1);
-         
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
@@ -125,18 +127,12 @@ end % for
 fprintf('********************\n')
 close(wb)
 %
-time
-s11
-fprintf('eps11 %f\n', e11);
-%fprintf('eps22 %f\n', eps22);
-%fprintf('eps33 %f\n', eps33);
-
 data = [time; e11; s11; eps22];
 
 fileID = fopen('output.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}');
 fprintf(fileID,'%25s\n','');
-fprintf(fileID,'%3.1f %15.4f %15.5f %15.4f\n',data);
+fprintf(fileID,'%2.1f %15.4f %15.5f %15.4f\n',data);
 fclose(fileID);
 
 figure(1)
@@ -150,27 +146,27 @@ ylabel('e11')
 figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'r-')
-legend('\sigma_{11}','Ref.','Location','NorthWest')
-xlabel('eps11')
-ylabel('sig11')
+plot(e11,s11,'or-')
+legend('\sigma_{11}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{11}')
+ylabel('\sigma_{11}')
  
 
  
  % plot lateral strains
 figure(3)
-plot(e11,eps22,'b-')
+plot(e11,eps22,'ob-')
 hold on
-plot(e11,eps33,'g-')
+plot(e11,eps33,'og-')
+title('Computed using Numerical pertubration')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
-xlabel('eps11')
-ylabel('eps22, eps33')
+xlabel('\epsilon_{11}')
+ylabel('\epsilon_{22},\epsilon_{33}')
 
 
 % plot damage
 figure(4)
-plot(e11,sdv(1,:),'r-')
-legend('damage','Ref.','Location','West')
+plot(e11,sdv(1,:),'or-')
+legend('damage','Ref.','Location','East')
 xlabel('eps11')
 ylabel('damage')
-

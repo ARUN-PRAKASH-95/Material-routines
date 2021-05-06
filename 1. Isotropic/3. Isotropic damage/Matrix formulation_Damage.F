@@ -173,7 +173,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	yield    = 200
 	n        = 3 
       damage   = ustatev(1)
-	eta      = 1e-5
+	eta      = 0
       
 c *** define tsstif(1) since it is used for calculation of hourglass stiffness
       tsstif(1) = HALF * twoG

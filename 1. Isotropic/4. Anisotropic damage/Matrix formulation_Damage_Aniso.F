@@ -460,8 +460,8 @@ c****Damage initiation criteria
           
           else
               
-            C_T_1_b  = (/ ((1 - k1*F_f)/(F_f**3 * eps_11_f_c**2))
-     &     *exp(k1*(F_f - 1))*T_strain(1),ZERO,ZERO,ZERO,ZERO,ZERO/)
+            C_T_1_b  = (/ ((1 - k1*F_f)/(F_f**2 * eps_11_f_c))
+     &     *exp(k1*(F_f - 1)),ZERO,ZERO,ZERO,ZERO,ZERO/)
             
             
           endif
