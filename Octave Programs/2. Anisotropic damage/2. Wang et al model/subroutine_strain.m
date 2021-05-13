@@ -94,14 +94,14 @@ C(5,1) = 0;
 C(5,2) = 0;
 C(5,3) = 0;
 C(5,4) = 0;
-C(5,5) = g_yz*(1 - d1)*(1 - d3);
+C(5,5) = g_yz*(1 - d2)*(1 - d3);
 C(5,6) = 0;
 C(6,1) = 0;
 C(6,2) = 0;
 C(6,3) = 0;
 C(6,4) = 0;
 C(6,5) = 0;
-C(6,6) = g_xz*(1 - d3)*(1 - d2);
+C(6,6) = g_xz*(1 - d3)*(1 - d1);
 
 
 eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta));
@@ -111,15 +111,15 @@ eps_22_f_c = sig_22_f_c / ((1 -zx_xz) / (young_x*young_z*delta));
 eps_33_f_t = sig_33_f_t / ((1 -xy_yx) / (young_x*young_y*delta));
 eps_33_f_c = sig_33_f_c / ((1 -xy_yx) / (young_x*young_y*delta));
 eps_12_f   = sig_12_f / g_xy;
-eps_13_f   = sig_13_f / g_yz;
-eps_23_f   = sig_23_f / g_xz;
+eps_13_f   = sig_13_f / g_xz;
+eps_23_f   = sig_23_f / g_yz;
 
 
 %  Damage initiation criteria %
 
 if eps(1) >= 0
 
-  F_f_new  =  sqrt((eps(1)/eps_11_f_t)**2 + (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2);
+  F_f_new  =  sqrt((eps(1)/eps_11_f_t)**2 + (eps(4)/eps_12_f)**2 + (eps(6)/eps_13_f)**2);
 
 elseif eps(1) < 0
    
@@ -132,11 +132,11 @@ endif
 
 if eps(2)+eps(3) >= 0 
   
-  F_m_new =   sqrt(((eps(2)+eps(3))**2/(eps_22_f_t*eps_33_f_t)) -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2);
+  F_m_new =   sqrt(((eps(2)+eps(3))**2/(eps_22_f_t*eps_33_f_t)) -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(6)/eps_13_f)**2 + (eps(5)/eps_23_f)**2);
  
 elseif eps(2)+eps(3) < 0
   
-  F_m_new  =  sqrt(((eps(2)+eps(3))**2/(eps_22_f_c*eps_33_f_c)) + ((eps(2)+eps(3)/eps_22_f_c)*( (eps_22_f_c/2*eps_12_f)  - 1))   -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(5)/eps_13_f)**2 + (eps(6)/eps_23_f)**2);
+  F_m_new  =  sqrt(((eps(2)+eps(3))**2/(eps_22_f_c*eps_33_f_c)) + ((eps(2)+eps(3)/eps_22_f_c)*( (eps_22_f_c/2*eps_12_f)  - 1))   -  (eps(2)*eps(3)/eps_23_f**2) +  (eps(4)/eps_12_f)**2 + (eps(6)/eps_13_f)**2 + (eps(5)/eps_23_f)**2);
 
 endif
 
@@ -310,14 +310,14 @@ else
     C_d(5,2) = 0;
     C_d(5,3) = 0;
     C_d(5,4) = 0;
-    C_d(5,5) = g_yz*(1 - d1)*(1 - d3);
+    C_d(5,5) = g_yz*(1 - d2)*(1 - d3);
     C_d(5,6) = 0;
     C_d(6,1) = 0;
     C_d(6,2) = 0;
     C_d(6,3) = 0;
     C_d(6,4) = 0;
     C_d(6,5) = 0;
-    C_d(6,6) = g_xz*(1 - d3)*(1 - d2);
+    C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
     C_d;
     
     if d1 == 0
@@ -336,7 +336,7 @@ else
       d_C_d_d1(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d2 - 1);
       d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d3 - 1);
       d_C_d_d1(4,4) = g_xy*(d2 -1);
-      d_C_d_d1(5,5) = g_yz*(d3 -1);
+      d_C_d_d1(6,6) = g_xz*(d3 -1);
 
     %%%%  (d_C_d/d1 : eps)  %%%%%
       C_T_1_a = zeros(6,1);
@@ -352,7 +352,7 @@ else
       %%%%%%   For Tension   %%%%%%
       if eps(1) > 0
 
-        C_T_1_b  = [ ((1 - k1*F_f)/(F_f**3 * eps_11_f_t**2))*exp(k1*(F_f - 1))*eps(1); 0; 0; ((1 - k1*F_f)/(F_f**3 * eps_12_f**2))*exp(k1*(F_f - 1))*eps(4); ((1 - k1*F_f)/(F_f**3 * eps_13_f**2))*exp(k1*(F_f - 1))*eps(5); 0; ];
+        C_T_1_b  = [ ((1 - k1*F_f)/(F_f**3 * eps_11_f_t**2))*exp(k1*(F_f - 1))*eps(1); 0; 0; ((1 - k1*F_f)/(F_f**3 * eps_12_f**2))*exp(k1*(F_f - 1))*eps(4);  0; ((1 - k1*F_f)/(F_f**3 * eps_13_f**2))*exp(k1*(F_f - 1))*eps(6); ];
         
         
       %%%%%   For Compression  %%%%%%
@@ -385,7 +385,7 @@ else
       d_C_d_d2(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);   
       d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);
       d_C_d_d2(4,4) = g_xy*(d1 - 1);
-      d_C_d_d2(6,6) = g_xz*(d3 - 1);
+      d_C_d_d2(5,5) = g_yz*(d3 - 1);
 
    %%%%%  (d_C_d/d2 : eps)  %%%%%
       C_T_2_a = zeros(6,1);
@@ -405,19 +405,19 @@ else
         term2  =  (2*(eps(2) + eps(3))/(eps_22_f_t*eps_33_f_t))  -  (eps(2)/eps_23_f**2);
         
         
-        C_T_2_b  = [0; 0.5*((1 - k2*F_m)/(F_m**3))*exp(k2*(F_m - 1))*term1; 0.5*((1 - k2*F_m)/(F_m**3))*exp(k2*(F_m - 1))*term2; ((1 - k2*F_m)/(F_m**3 * eps_12_f**2))*exp(k2*(F_m - 1))*eps(4); ((1 - k2*F_m)/(F_m**3 * eps_13_f**2))*exp(k2*(F_m - 1))*eps(5); ((1 - k2*F_m)/(F_m**3 * eps_23_f**2))*exp(k2*(F_m - 1))*eps(6);];
+        C_T_2_b  = [0; 0.5*((1 - k2*F_m)/(F_m**3))*exp(k2*(F_m - 1))*term1; 0.5*((1 - k2*F_m)/(F_m**3))*exp(k2*(F_m - 1))*term2; ((1 - k2*F_m)/(F_m**3 * eps_12_f**2))*exp(k2*(F_m - 1))*eps(4); ((1 - k2*F_m)/(F_m**3 * eps_23_f**2))*exp(k2*(F_m - 1))*eps(5);((1 - k2*F_m)/(F_m**3 * eps_13_f**2))*exp(k2*(F_m - 1))*eps(6); ];
         
 
       %%%%%   For Compression  %%%%%%  
       elseif eps(2) + eps(3) < 0
         
-        
+         
         term1 =  ((2*(eps(2) + eps(3))/(eps_22_f_c*eps_33_f_c))  +  ((eps_22_f_c/(2*eps_12_f)) - 1)/eps_22_f_c   -  (eps(3)/eps_23_f**2))/(2*F_m);  
 
         term2 =  ((2*(eps(2) + eps(3))/(eps_22_f_c*eps_33_f_c))  +  ((eps_22_f_c/(2*eps_12_f)) - 1)/eps_22_f_c   -  (eps(2)/eps_23_f**2))/(2*F_m);
 
 
-        C_T_2_b  =  [0;  ((1 - k2*F_m)/(F_m**2))*exp(k2*(F_m - 1))*term1; ((1 - k2*F_m)/(F_m**2))*exp(k2*(F_m - 1))*term2; ((1 - k2*F_m)/(F_m**3 * eps_12_f**2))*exp(k2*(F_m - 1))*eps(4); ((1 - k2*F_m)/(F_m**3 * eps_13_f**2))*exp(k2*(F_m - 1))*eps(5); ((1 - k2*F_m)/(F_m**3 * eps_23_f**2))*exp(k2*(F_m - 1))*eps(6);];
+        C_T_2_b  =  [0;  ((1 - k2*F_m)/(F_m**2))*exp(k2*(F_m - 1))*term1; ((1 - k2*F_m)/(F_m**2))*exp(k2*(F_m - 1))*term2; ((1 - k2*F_m)/(F_m**3 * eps_12_f**2))*exp(k2*(F_m - 1))*eps(4); ((1 - k2*F_m)/(F_m**3 * eps_23_f**2))*exp(k2*(F_m - 1))*eps(5); ((1 - k2*F_m)/(F_m**3 * eps_13_f**2))*exp(k2*(F_m - 1))*eps(6); ];
           
       endif
 
@@ -443,8 +443,8 @@ else
       d_C_d_d3(3,1)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d1 - 1);
       d_C_d_d3(3,2)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d2 - 1);
       d_C_d_d3(3,3)  =  -2*((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3);
-      d_C_d_d3(5,5)  =  g_yz*(d1 - 1);
-      d_C_d_d3(6,6)  =  g_xz*(d2 - 1);
+      d_C_d_d3(5,5)  =  g_yz*(d2 - 1);
+      d_C_d_d3(6,6)  =  g_xz*(d1 - 1);
       
       %%%%% (d_C_d/d3 : eps) %%%%
       C_T_3_a = zeros(6,1);
@@ -459,12 +459,12 @@ else
       %%%%%%   For Tension   %%%%%%       
       if eps(3) >= 0 
         
-        C_T_3_b = [0; 0; ((1 - k3*F_z)/(F_z**3 * eps_33_f_t**2))*exp(k3*(F_z - 1))*eps(3); 0; ((1 - k3*F_z)/(F_z**3 * eps_13_f**2))*exp(k3*(F_z - 1))*eps(5);  ((1 - k3*F_z)/(F_z**3 * eps_23_f**2))*exp(k3*(F_z - 1))*eps(6);];
+        C_T_3_b = [0; 0; ((1 - k3*F_z)/(F_z**3 * eps_33_f_t**2))*exp(k3*(F_z - 1))*eps(3); 0; ((1 - k3*F_z)/(F_z**3 * eps_23_f**2))*exp(k3*(F_z - 1))*eps(5); ((1 - k3*F_z)/(F_z**3 * eps_13_f**2))*exp(k3*(F_z - 1))*eps(6);  ];
         
       %%%%%   For Compression  %%%%%%
       elseif eps(3) < 0
         
-        C_T_3_b = [0; 0; ((1 - k3*F_z)/(F_z**3 * eps_33_f_c**2))*exp(k3*(F_z - 1))*eps(3); 0; ((1 - k3*F_z)/(F_z**3 * eps_13_f**2))*exp(k3*(F_z - 1))*eps(5);  ((1 - k3*F_z)/(F_z**3 * eps_23_f**2))*exp(k3*(F_z - 1))*eps(6);];
+        C_T_3_b = [0; 0; ((1 - k3*F_z)/(F_z**3 * eps_33_f_c**2))*exp(k3*(F_z - 1))*eps(3); 0; ((1 - k3*F_z)/(F_z**3 * eps_23_f**2))*exp(k3*(F_z - 1))*eps(5); ((1 - k3*F_z)/(F_z**3 * eps_13_f**2))*exp(k3*(F_z - 1))*eps(6);  ];
 
       endif
       

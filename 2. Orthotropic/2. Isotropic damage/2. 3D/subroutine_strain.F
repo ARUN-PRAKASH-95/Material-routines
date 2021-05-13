@@ -466,7 +466,7 @@ c *** Update stress i
       end do
       
 
-      
+c***  Update stiffness      
       if ((F_f <= 1) .AND. (F_m <= 1) .AND. (F_z <= 1)) then
           
           do i = 1,mcomp

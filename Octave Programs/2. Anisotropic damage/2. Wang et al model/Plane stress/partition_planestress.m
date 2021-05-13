@@ -1,5 +1,5 @@
 function [out]=partition_planestress(in)
-numel(in)
+
 if numel(in)==3
     
     % 6x1-matrix -> 5x1-matrix

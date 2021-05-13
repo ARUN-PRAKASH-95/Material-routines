@@ -94,14 +94,14 @@ C(5,1) = 0;
 C(5,2) = 0;
 C(5,3) = 0;
 C(5,4) = 0;
-C(5,5) = g_yz*(1 - d1)*(1 - d3);
+C(5,5) = g_yz*(1 - d2)*(1 - d3);
 C(5,6) = 0;
 C(6,1) = 0;
 C(6,2) = 0;
 C(6,3) = 0;
 C(6,4) = 0;
 C(6,5) = 0;
-C(6,6) = g_xz*(1 - d3)*(1 - d2);
+C(6,6) = g_xz*(1 - d3)*(1 - d1);
 C;
 
 
@@ -112,8 +112,8 @@ eps_22_f_c = sig_22_f_c / ((1 -zx_xz) / (young_x*young_z*delta));
 eps_33_f_t = sig_33_f_t / ((1 -xy_yx) / (young_x*young_y*delta));
 eps_33_f_c = sig_33_f_c / ((1 -xy_yx) / (young_x*young_y*delta))
 eps_12_f   = sig_12_f / g_xy;
-eps_13_f   = sig_13_f / g_yz;
-eps_23_f   = sig_23_f / g_xz;
+eps_13_f   = sig_13_f / g_xz;
+eps_23_f   = sig_23_f / g_yz;
 
 
 %  Damage initiation criteria %
@@ -312,14 +312,14 @@ else
     C_d(5,2) = 0;
     C_d(5,3) = 0;
     C_d(5,4) = 0;
-    C_d(5,5) = g_yz*(1 - d1)*(1 - d3);
+    C_d(5,5) = g_yz*(1 - d2)*(1 - d3);
     C_d(5,6) = 0;
     C_d(6,1) = 0;
     C_d(6,2) = 0;
     C_d(6,3) = 0;
     C_d(6,4) = 0;
     C_d(6,5) = 0;
-    C_d(6,6) = g_xz*(1 - d3)*(1 - d2);
+    C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
     C_d;
 
     
@@ -339,7 +339,7 @@ else
       d_C_d_d1(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d2 - 1);
       d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d3 - 1);
       d_C_d_d1(4,4) = g_xy*(d2 -1);
-      d_C_d_d1(5,5) = g_yz*(d3 -1);
+      d_C_d_d1(6,6) = g_xz*(d3 -1);
 
     %%%%  (d_C_d/d1 : eps)  %%%%%
       C_T_1_a = zeros(6,1);
@@ -388,7 +388,7 @@ else
       d_C_d_d2(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);   
       d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);
       d_C_d_d2(4,4) = g_xy*(d1 - 1);
-      d_C_d_d2(6,6) = g_xz*(d3 - 1);
+      d_C_d_d2(5,5) = g_yz*(d3 - 1);
 
    %%%%%  (d_C_d/d2 : eps)  %%%%%
       C_T_2_a = zeros(6,1);
@@ -437,8 +437,8 @@ else
       d_C_d_d3(3,1)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d1 - 1);
       d_C_d_d3(3,2)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d2 - 1);
       d_C_d_d3(3,3)  =  -2*((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3);
-      d_C_d_d3(5,5)  =  g_yz*(d1 - 1);
-      d_C_d_d3(6,6)  =  g_xz*(d2 - 1);
+      d_C_d_d3(5,5)  =  g_yz*(d2 - 1);
+      d_C_d_d3(6,6)  =  g_xz*(d1 - 1);
       
       %%%%% (d_C_d/d3 : eps) %%%%
       C_T_3_a = zeros(6,1);

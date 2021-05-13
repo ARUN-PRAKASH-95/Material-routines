@@ -246,14 +246,14 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	dsdeEl(5,2) = 0 
 	dsdeEl(5,3) = 0
 	dsdeEl(5,4) = 0
-	dsdeEl(5,5) = g_yz*(ONE - d1)*(ONE - d3)
+	dsdeEl(5,5) = g_yz*(ONE - d2)*(ONE - d3)
 	dsdeEl(5,6) = 0
 	dsdeEl(6,1) = 0
 	dsdeEl(6,2) = 0 
 	dsdeEl(6,3) = 0
 	dsdeEl(6,4) = 0
 	dsdeEl(6,5) = 0
-	dsdeEl(6,6) = g_xz*(ONE - d3)*(ONE - d2)
+	dsdeEl(6,6) = g_xz*(ONE - d3)*(ONE - d1)
 
   
       
@@ -439,14 +439,14 @@ c********      Degraded stiffness   **********
         dsdeEl_d(5,2) = 0 
         dsdeEl_d(5,3) = 0
         dsdeEl_d(5,4) = 0
-        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
+        dsdeEl_d(5,5) = g_yz*(ONE - d2)*(ONE - d3)
         dsdeEl_d(5,6) = 0
         dsdeEl_d(6,1) = 0
         dsdeEl_d(6,2) = 0 
         dsdeEl_d(6,3) = 0
         dsdeEl_d(6,4) = 0
         dsdeEl_d(6,5) = 0
-        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2)
+        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d1)
          
         
         if (d1 == 0) then
@@ -478,7 +478,7 @@ c*********     First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))
           d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
      &                     delta))*(d3 - ONE)
           d_C_d_d1(4,4) = g_xy*(d2 -ONE)
-          d_C_d_d1(5,5) = g_yz*(d3 -ONE)
+          d_C_d_d1(6,6) = g_xz*(d3 -ONE)
           
           
 c********   (d_C_d/d1 : eps)   **********          
@@ -546,7 +546,7 @@ c*******   Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))   
           d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
      &                     delta))*(d3 - ONE)
           d_C_d_d2(4,4) = g_xy*(d1 - ONE)
-          d_C_d_d2(6,6) = g_xz*(d3 - ONE)
+          d_C_d_d2(5,5) = g_yz*(d3 - ONE)
           
 c*****   (d_C_d/d2 : eps)         
           do i=1,ncomp
@@ -609,8 +609,8 @@ c*****  Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon))
      &                     delta))*(d2 - ONE) 
          d_C_d_d3(3,3)  =  -TWO*((1 -xy_yx) / (young_x*young_y*
      &                     delta))*(ONE - d3) 
-         d_C_d_d3(5,5)  =  g_yz*(d1 - ONE)     
-         d_C_d_d3(6,6)  =  g_xz*(d2 - ONE)  
+         d_C_d_d3(5,5)  =  g_yz*(d2 - ONE)     
+         d_C_d_d3(6,6)  =  g_xz*(d1 - ONE)  
          
          
 c*****      (d_C_d/d3 : eps)        

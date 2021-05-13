@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_strain(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -135,7 +135,7 @@ close(wb)
 
 data = [time; e11; s11; eps22; eps33;];
 
-fileID = fopen('output_max_stress_NT.txt','w');
+fileID = fopen('output_hashins_stress_NT.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}','Epsilon_{33}');
 fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%3.1f %15.5f %15.5f %15.5f %15.5f\n',data);

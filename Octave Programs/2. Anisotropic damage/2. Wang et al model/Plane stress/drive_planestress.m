@@ -125,14 +125,14 @@ end % for
 fprintf('********************\n')
 close(wb)
 %
-s
+
 %fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
 
 data = [time; e11; s11; eps22; ];
 
-fileID = fopen('output_strain.txt','w');
+fileID = fopen('output_stress_ATS.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}');
 fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%3.1f %15.4f %15.5f %15.4f\n',data);

@@ -148,7 +148,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,V,eta
+     &                    F_m_new,F_z_new,V,eta,D
 
       
       
@@ -186,18 +186,16 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	
 
 ********* ELASTIC STIFFNESS MATRIX *********
-	
-	dsdeEl(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE - d1)**2
-	dsdeEl(1,2) = (pr_xy * young_y /(ONE - pr_xy*pr_yx))*(ONE - d1)
-     &              *(ONE - d2)
+	D  =  ONE  -  ((ONE - d1)*(ONE - d2)*pr_xy*pr_yx)
+	dsdeEl(1,1) = young_x*(ONE - d1)*(ONE/D)
+	dsdeEl(1,2) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
 	dsdeEl(1,3) = ZERO
-	dsdeEl(2,1) = (pr_xy * young_y /(ONE - pr_xy*pr_yx))*(ONE-d1)
-     &              *(ONE - d2)
-      dsdeEl(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE-d2)**2
+	dsdeEl(2,1) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
+      dsdeEl(2,2) = young_y*(ONE - d2)*(ONE/D)
 	dsdeEl(2,3) = ZERO
 	dsdeEl(3,1) = ZERO
       dsdeEl(3,2) = ZERO
-      dsdeEl(3,3) = g_xy*(ONE-d3)**2
+      dsdeEl(3,3) = g_xy*(ONE-d3)
 
 
   
@@ -328,17 +326,17 @@ c*********   Damage evolution equations    ***********
         
         
 c********      Degraded stiffness   **********      
-        dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE - d1)**2
-        dsdeEl_d(1,2) = (pr_xy * young_y /(ONE - pr_xy*pr_yx))*(ONE -d1)
-     &              *(ONE - d2)
+        D  =  ONE  -  ((ONE - d1)*(ONE - d2)*pr_xy*pr_yx)
+        dsdeEl_d(1,1) = young_x*(ONE - d1)*(ONE/D)
+        dsdeEl_d(1,2) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
         dsdeEl_d(1,3) = ZERO
-        dsdeEl_d(2,1) = (pr_xy * young_y /(ONE - pr_xy*pr_yx))*(ONE-d1)
-     &              *(ONE - d2)
-        dsdeEl_d(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE-d2)**2
+        dsdeEl_d(2,1) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
+        dsdeEl_d(2,2) = young_y*(ONE - d2)*(ONE/D)
         dsdeEl_d(2,3) = ZERO
         dsdeEl_d(3,1) = ZERO
         dsdeEl_d(3,2) = ZERO
-        dsdeEl_d(3,3) = g_xy*(ONE-d3)**2
+        dsdeEl_d(3,3) = g_xy*(ONE-d3)
+
          
         
         if (d1 == 0) then
@@ -358,7 +356,10 @@ c********      Degraded stiffness   **********
           end do 
           
 c*********     First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))  ************
-          d_C_d_d1(1,1) = -2*(young_x/(1 - pr_xy*pr_yx))*(1 - d1)          d_C_d_d1(1,2) = (pr_xy * young_y /(1 - pr_xy*pr_yx))*(d2 - 1)          d_C_d_d1(2,1) = (pr_xy * young_y /(1 - pr_xy*pr_yx))*(d2 - 1)          d_C_d_d1(3,3) =  g_xy*(1 - d2)
+          d_C_d_d1(1,1) = -young_x/D**2
+          d_C_d_d1(1,2) = ((d2 - ONE)*pr_xy*young_y)/(D**2)
+          d_C_d_d1(2,1) = ((d2 - ONE)*pr_xy*young_y)/(D**2)
+          d_C_d_d1(2,2) = ((d2 - ONE)**2*pr_xy*pr_yx*young_y)/(D**2)            d_C_d_d1(3,3) =  g_xy*(1 - d2)
           
           
 c********   (d_C_d/d1 : eps)   **********          
@@ -411,8 +412,12 @@ c**       For Compression
              end do
           end do 
         
-c*******   Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))    *********       
-          d_C_d_d2(1,2) = (pr_xy * young_y /(1 - pr_xy*pr_yx))*(d1 - 1)          d_C_d_d2(2,1) = (pr_xy * young_y /(1 - pr_xy*pr_yx))*(d1 - 1)          d_C_d_d2(2,2) = (young_y/(1 - pr_xy*pr_yx))*(1 - d2)          d_C_d_d2(3,3) =  (1 - d1)*g_xy 
+c*******   Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))    ********* 
+          d_C_d_d2(1,1) = ((d1 - ONE)**2*pr_xy*pr_yx*young_x)/(D**2) 
+          d_C_d_d2(1,2) = ((d1 - ONE)*pr_xy*young_y)/(D**2)
+          d_C_d_d2(2,1) = ((d1 - ONE)*pr_xy*young_y)/(D**2)
+          d_C_d_d2(2,2) = -young_y/D**2
+          d_C_d_d2(3,3) =  g_xy*(1 - d1)
           
 c*****   (d_C_d/d2 : eps)         
           do i=1,ncomp
