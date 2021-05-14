@@ -258,7 +258,7 @@ else
     
     %%%%%%%% Damage evolution equations  %%%%%%%%%%
     
-    if F_f**2 > 1
+    if F_f > 1
       
       d1_new =  1  - ((exp(k1*(F_f - 1)))/F_f);     %d1
 
@@ -272,7 +272,7 @@ else
     endif
     
     
-    if F_m**2 > 1
+    if F_m > 1
        
       d2_new = 1  - ((exp(k2*(F_m - 1)))/F_m);     %d2
       
@@ -286,7 +286,7 @@ else
     endif
     
     
-    if F_z**2 > 1
+    if F_z > 1
       
       d3_new = 1  - (exp(k3*(F_z - 1))/F_z);     %d3
       
