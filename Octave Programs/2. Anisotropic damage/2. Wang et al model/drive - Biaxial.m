@@ -130,7 +130,7 @@ close(wb)
 %
 %time
 %s11
-fprintf('eps11 %f\n', e11);
+%fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
 

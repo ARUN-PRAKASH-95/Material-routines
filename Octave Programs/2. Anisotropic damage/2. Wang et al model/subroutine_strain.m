@@ -18,8 +18,8 @@ sig_11_f_t = matp(10);
 sig_11_f_c = matp(11);
 sig_22_f_t = matp(12);
 sig_22_f_c = matp(13);
-sig_33_f_t = 50e6;
-sig_33_f_c = -150e6;
+sig_33_f_t = matp(12);
+sig_33_f_c = matp(13);
 sig_12_f   =  sig_13_f = sig_23_f = matp(14);
 G_c_1      = matp(15);
 G_c_2      = matp(17);
@@ -229,9 +229,7 @@ else
       k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3;
       
     endif   
-    k1
-    k2
-    k3
+
    
     
     %%%%%%%% Damage evolution equations  %%%%%%%%%%
@@ -275,9 +273,9 @@ else
       end
       
     endif
-    %d1
-    %d2
-    %d3
+    d1
+    d2
+    d3
     
     
     %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%

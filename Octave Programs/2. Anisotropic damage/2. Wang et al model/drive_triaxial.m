@@ -103,7 +103,7 @@ for n=1:steps
          epsilon(4:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_hashins_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
         
         % 3.) partitioning
         sbar=partitiontri(s);

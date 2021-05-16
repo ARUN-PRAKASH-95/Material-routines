@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_hashins_stress(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -154,8 +154,9 @@ figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
 plot(e11,s11,'or-')
-xlabel('eps11')
-ylabel('sig11')
+legend('\sigma_{11}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{11}')
+ylabel('\sigma_{11}')
  
 
  

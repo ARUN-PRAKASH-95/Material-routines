@@ -367,23 +367,9 @@ else
     
       %%%%%%%%% First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))   %%%%%%%%%%
 
-      d_C_d_d1  =  zeros(6,6);
 
-      d_C_d_d1(1,1) = -2*((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1);
-      d_C_d_d1(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d2 - 1);
-      d_C_d_d1(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d3 - 1);
-      d_C_d_d1(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d2 - 1);
-      d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d3 - 1);
-      d_C_d_d1(4,4) = g_xy*(d2 -1);
-      d_C_d_d1(6,6) = g_xz*(d3 -1);
-
-      %%%%  (d_C_d/d1 : eps)  %%%%%
       C_T_1_a = zeros(6,1);
-      for i = 1:6
-         for j = 1:6
-            C_T_1_a(i) = C_T_1_a(i) + d_C_d_d1(i,j)*eps(j); 
-         end
-      end
+      C_T_1_a = [-sig6_eff(1); 0; 0; (d2 -1)*sig6_eff(4); 0; (d3 -1)*sig6_eff(6);];
 
       
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
@@ -416,23 +402,8 @@ else
 
       %%%%%%%%% Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))   %%%%%%%%%%
 
-      d_C_d_d2  =  zeros(6,6);
-
-      d_C_d_d2(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d1 - 1);
-      d_C_d_d2(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d1 - 1); 
-      d_C_d_d2(2,2) = -2*((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2);
-      d_C_d_d2(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);   
-      d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);
-      d_C_d_d2(4,4) = g_xy*(d1 - 1);
-      d_C_d_d2(5,5) = g_yz*(d3 - 1);
-
-   %%%%%  (d_C_d/d2 : eps)  %%%%%
       C_T_2_a = zeros(6,1);
-      for i = 1:6
-         for j = 1:6
-            C_T_2_a(i) = C_T_2_a(i) + d_C_d_d2(i,j)*eps(j); 
-         end
-      end
+      C_T_2_a = [ 0; -sig6_eff(2); 0; (d1 -1)*sig6_eff(4); (d3 -1)*sig6_eff(5); 0; ];
 
     %%%%%%%%%%%%%%%%   Derivative of d2 with respect to strain (d_d2/d_epsilon)  %%%%%%%%%%%%%
 
@@ -465,23 +436,8 @@ else
       
       %%%%%%%%% Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon))  %%%%%%%%%%
       
-      d_C_d_d3  =  zeros(6,6);
-      
-      d_C_d_d3(1,3)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d1 - 1);
-      d_C_d_d3(2,3)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d2 - 1);
-      d_C_d_d3(3,1)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d1 - 1);
-      d_C_d_d3(3,2)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d2 - 1);
-      d_C_d_d3(3,3)  =  -2*((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3);
-      d_C_d_d3(5,5)  =  g_yz*(d2 - 1);
-      d_C_d_d3(6,6)  =  g_xz*(d1 - 1);
-      
-      %%%%% (d_C_d/d3 : eps) %%%%
       C_T_3_a = zeros(6,1);
-      for i = 1:6
-         for j = 1:6
-            C_T_3_a(i) = C_T_3_a(i) + d_C_d_d3(i,j)*eps(j); 
-         end
-      end
+      C_T_3_a = [ 0; 0; -sig6_eff(3);  0;  (d2 -1)*sig6_eff(5); (d1 -1)*sig6_eff(6);  ];
 
     %%%%%%%%%%%%%%%%   Derivative of d3 with respect to strain (d_d3/d_epsilon)  %%%%%%%%%%%%%
      
