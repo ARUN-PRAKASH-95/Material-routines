@@ -1,4 +1,4 @@
-function [sig6,A66,sdvl]=subroutine_max_stress_2(eps6,sdvl,ttype)
+function [sig6,A66,sdvl]=subroutine_max_stress_no_c(eps6,sdvl,ttype)
 
 
 
@@ -45,7 +45,7 @@ delta = (1 - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz;
 
 % restore the strain tensor in voigt notation
 eps = [eps6(1); eps6(2); eps6(3); eps6(4); eps6(5); eps6(6);];
-
+eps
 % restore the strain tensor
 eps_tensor = [eps6(1) eps6(4)/2 eps6(6)/2;
               eps6(4)/2 eps6(2) eps6(5)/2;
@@ -120,7 +120,7 @@ for i = 1:6
       sig6_eff(i) = sig6_eff(i) + C(i,j)*eps(j); 
    end
 end
-
+sig6_eff;
 
 
 
@@ -182,9 +182,7 @@ else
     F_z = F_z;
 end
 
-F_f;
-F_m;
-F_z;
+
 
 sig6 = zeros(6,1);
 %%%%%%%%  Check whether damage has initiated or not  %%%%%%%%%
@@ -297,7 +295,9 @@ else
       end
       
     endif
-    
+    d1
+    d2
+    d3
 
 %%%%%%   Inverse of damage effect tensor (M_inverse)  %%%%%%%%  
     M_inv = zeros(6,6);
@@ -315,51 +315,23 @@ else
           sig6(i) = sig6(i) + M_inv(i,j)*sig6_eff(j);
        end
     end    
-    
+    sig6
    
 %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%
     C_d = zeros(6,6);
-    C_d(1,1) = ((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1)**2;
-    C_d(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_d(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d1)*(1 - d3);
-    C_d(1,4) = 0;
-    C_d(1,5) = 0;
-    C_d(1,6) = 0;
-    C_d(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_d(2,2) = ((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2)**2;
-    C_d(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_d(2,4) = 0;
-    C_d(2,5) = 0;
-    C_d(2,6) = 0;
-    C_d(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d3)*(1 - d1);
-    C_d(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_d(3,3) = ((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3)**2;
-    C_d(3,4) = 0;
-    C_d(3,5) = 0;
-    C_d(3,6) = 0;
-    C_d(4,1) = 0;
-    C_d(4,2) = 0;
-    C_d(4,3) = 0;
-    C_d(4,4) = g_xy*(1 - d1)*(1 - d2);
-    C_d(4,5) = 0;
-    C_d(4,6) = 0;
-    C_d(5,1) = 0;
-    C_d(5,2) = 0;
-    C_d(5,3) = 0;
-    C_d(5,4) = 0;
-    C_d(5,5) = g_yz*(1 - d2)*(1 - d3);
-    C_d(5,6) = 0;
-    C_d(6,1) = 0;
-    C_d(6,2) = 0;
-    C_d(6,3) = 0;
-    C_d(6,4) = 0;
-    C_d(6,5) = 0;
-    C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
-    C_d;
+    for i = 1:6
+       for j = 1:6
+         if (sig6(j)==0 | eps(i)==0)
+           C_d(j,i) = 0;
+         else
+          C_d(j,i) = sig6(j)/eps(i);
+         endif
+       end
+    end      
+    C_d
     
- 
 %%%%%%%%%  Second term of the tangent stiffness   %%%%%%%% 
-    if d1 == 0
+    if d1 == 0 | d1 == 1
       
       C_T_1 = zeros(6,6);   
       
@@ -367,23 +339,9 @@ else
     
       %%%%%%%%% First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))   %%%%%%%%%%
 
-      d_C_d_d1  =  zeros(6,6);
 
-      d_C_d_d1(1,1) = -2*((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1);
-      d_C_d_d1(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d2 - 1);
-      d_C_d_d1(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d3 - 1);
-      d_C_d_d1(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d2 - 1);
-      d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d3 - 1);
-      d_C_d_d1(4,4) = g_xy*(d2 -1);
-      d_C_d_d1(6,6) = g_xz*(d3 -1);
-
-      %%%%  (d_C_d/d1 : eps)  %%%%%
       C_T_1_a = zeros(6,1);
-      for i = 1:6
-         for j = 1:6
-            C_T_1_a(i) = C_T_1_a(i) + d_C_d_d1(i,j)*eps(j); 
-         end
-      end
+      C_T_1_a = [-sig6_eff(1); 0; 0; (d2 -1)*sig6_eff(4); 0; (d3 -1)*sig6_eff(6);];
 
       
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
@@ -400,14 +358,14 @@ else
         C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
        
       endif
-        
+      C_T_1_b;
       C_T_1  =  C_T_1_a*C_T_1_b';
-      
+     
     endif
     
     
 
-    if d2 == 0
+    if d2 == 0 | d2 == 1
       
       C_T_2  =  zeros(6,6);
      
@@ -416,23 +374,8 @@ else
 
       %%%%%%%%% Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))   %%%%%%%%%%
 
-      d_C_d_d2  =  zeros(6,6);
-
-      d_C_d_d2(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d1 - 1);
-      d_C_d_d2(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(d1 - 1); 
-      d_C_d_d2(2,2) = -2*((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2);
-      d_C_d_d2(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);   
-      d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d3 - 1);
-      d_C_d_d2(4,4) = g_xy*(d1 - 1);
-      d_C_d_d2(5,5) = g_yz*(d3 - 1);
-
-   %%%%%  (d_C_d/d2 : eps)  %%%%%
       C_T_2_a = zeros(6,1);
-      for i = 1:6
-         for j = 1:6
-            C_T_2_a(i) = C_T_2_a(i) + d_C_d_d2(i,j)*eps(j); 
-         end
-      end
+      C_T_2_a = [ 0; -sig6_eff(2); 0; (d1 -1)*sig6_eff(4); (d3 -1)*sig6_eff(5); 0; ];
 
     %%%%%%%%%%%%%%%%   Derivative of d2 with respect to strain (d_d2/d_epsilon)  %%%%%%%%%%%%%
 
@@ -456,7 +399,7 @@ else
     
     
     
-   if d3  == 0
+   if d3  == 0 | d3 == 1 
      
      C_T_3  =  zeros(6,6);
    
@@ -465,23 +408,8 @@ else
       
       %%%%%%%%% Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon))  %%%%%%%%%%
       
-      d_C_d_d3  =  zeros(6,6);
-      
-      d_C_d_d3(1,3)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d1 - 1);
-      d_C_d_d3(2,3)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d2 - 1);
-      d_C_d_d3(3,1)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(d1 - 1);
-      d_C_d_d3(3,2)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(d2 - 1);
-      d_C_d_d3(3,3)  =  -2*((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3);
-      d_C_d_d3(5,5)  =  g_yz*(d2 - 1);
-      d_C_d_d3(6,6)  =  g_xz*(d1 - 1);
-      
-      %%%%% (d_C_d/d3 : eps) %%%%
       C_T_3_a = zeros(6,1);
-      for i = 1:6
-         for j = 1:6
-            C_T_3_a(i) = C_T_3_a(i) + d_C_d_d3(i,j)*eps(j); 
-         end
-      end
+      C_T_3_a = [ 0; 0; -sig6_eff(3);  0;  (d2 -1)*sig6_eff(5); (d1 -1)*sig6_eff(6);  ];
 
     %%%%%%%%%%%%%%%%   Derivative of d3 with respect to strain (d_d3/d_epsilon)  %%%%%%%%%%%%%
      
@@ -505,7 +433,7 @@ else
     
     %%%%%%%%%  Tangent stiffness %%%%%%%%%
     C_T  =  C_d + C_T_1 + C_T_2 + C_T_3;
-
+  
   
 endif
 
@@ -531,7 +459,7 @@ elseif ttype == 1
         %recursiv call of your material routine with ttype=0 to avoid
         %endless loop
         %Calculate perturbed stress, sdv are not overwritten
-        [sig6per,Adummy,sdvldummy] = subroutine_max_stress_2(epsper,sdvl,0);
+        [sig6per,Adummy,sdvldummy] = subroutine_max_stress_no_c(epsper,sdvl,0);
         %Simple differential quotient
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         

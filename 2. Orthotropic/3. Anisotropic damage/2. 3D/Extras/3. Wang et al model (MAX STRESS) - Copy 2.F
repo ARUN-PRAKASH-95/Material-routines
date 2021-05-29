@@ -125,13 +125,13 @@ c
       double precision  dsdeEl(mcomp,mcomp), sigma(mcomp),
      &                  sigi (mcomp), C_T(mcomp,mcomp),
      &                  dsdeEl_d(mcomp,mcomp), T_strain(mcomp),
-     &                  id(3,3), C_T_1(mcomp,mcomp),
-     &                  d_C_d_d1(mcomp,mcomp), C_T_1_a(mcomp), 
+     &                  id(3,3), C_T_1(mcomp,mcomp),M(mcomp,mcomp),
+     &                  C_T_1_a(mcomp),d_C_d_d1(mcomp,mcomp), 
      &                  C_T_1_b(mcomp), C_T_2(mcomp,mcomp), 
-     &                  d_C_d_d2(mcomp,mcomp), C_T_2_a(mcomp),
+     &                  C_T_2_a(mcomp),d_C_d_d2(mcomp,mcomp),
      &                  C_T_2_b(mcomp),C_T_3(mcomp,mcomp), 
-     &                  d_C_d_d3(mcomp,mcomp), C_T_3_a(mcomp),
-     &                  C_T_3_b(mcomp),value(mcomp),arr(mcomp)
+     &                  C_T_3_a(mcomp),d_C_d_d3(mcomp,mcomp),
+     &                  C_T_3_b(mcomp),sigma_eff(mcomp),inter(mcomp)
                   
 
       
@@ -154,9 +154,7 @@ c
       
       double precision    var0, var1, var2, var3, var4, var5,
      &                    var6, var7, var8
-	
 
- 
       V    = ustatev(1)
       d1   = ustatev(2)
       d2   = ustatev(3)
@@ -164,7 +162,8 @@ c
       F_f  = ustatev(5)
       F_m  = ustatev(6)
       F_z  = ustatev(7) 
-	      
+      
+      
 c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	young_x  = prop(1)
 	young_y  = prop(2)
@@ -189,7 +188,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       G_c_1      = 12.5e7
       G_c_2      = 1e7
       G_c_3      = 1e7
-      L_c        = V**(1/3)
+      L_c        = 1.25**(1/3)
     
    
       
@@ -205,58 +204,51 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	E_xyz = young_x*young_y*young_z
 	
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
-
-      
       tsstif(1) = g_xz
-      tsstif(2) = g_yz      
+      tsstif(2) = g_yz
 
+	
 
 
      
 ********* ELASTIC STIFFNESS MATRIX *********
 	
-	dsdeEl(1,1) = (ONE -yz_zy) / (young_y*young_z*delta)*(ONE - d1)**2
+	dsdeEl(1,1) = (ONE -yz_zy) / (young_y*young_z*delta)
 	dsdeEl(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-     &              *(ONE - d1)*(ONE - d2)
-	dsdeEl(1,3) = (pr_zx + pr_yx*pr_zy)/(young_y*young_z*delta)*(ONE 
-     &              - d1)*(ONE - d3)
+	dsdeEl(1,3) = (pr_zx + pr_yx*pr_zy)/(young_y*young_z*delta)
       dsdeEl(1,4) = 0
 	dsdeEl(1,5) = 0
 	dsdeEl(1,6) = 0
-	dsdeEl(2,1) = (pr_yx + pr_zx*pr_yz) /(young_y*young_z*delta)*(ONE
-     &              -d1)*(ONE - d2)
-      dsdeEl(2,2) = (ONE -zx_xz)/(young_x*young_z*delta)*(ONE-d2)**2
-	dsdeEl(2,3) = (pr_zy + pr_zx*pr_xy) /(young_x*young_z*delta)*(ONE 
-     &             - d3)*(ONE  - d2)
+	dsdeEl(2,1) = (pr_yx + pr_zx*pr_yz) /(young_y*young_z*delta)
+      dsdeEl(2,2) = (ONE -zx_xz)/(young_x*young_z*delta)
+	dsdeEl(2,3) = (pr_zy + pr_zx*pr_xy) /(young_x*young_z*delta) 
       dsdeEl(2,4) = 0
 	dsdeEl(2,5) = 0
 	dsdeEl(2,6) = 0
-	dsdeEl(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta)*(ONE  
-     &              - d3)*(ONE - d1)
-      dsdeEl(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE - d2)
-      dsdeEl(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)*(ONE-d3)**2
+	dsdeEl(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta) 
+      dsdeEl(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)
+      dsdeEl(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)
 	dsdeEl(3,4) = 0
 	dsdeEl(3,5) = 0
 	dsdeEl(3,6) = 0
 	dsdeEl(4,1) = 0
 	dsdeEl(4,2) = 0 
 	dsdeEl(4,3) = 0
-	dsdeEl(4,4) = g_xy*(ONE - d1)*(ONE - d2)
+	dsdeEl(4,4) = g_xy
 	dsdeEl(4,5) = 0
 	dsdeEl(4,6) = 0
 	dsdeEl(5,1) = 0
 	dsdeEl(5,2) = 0 
 	dsdeEl(5,3) = 0
 	dsdeEl(5,4) = 0
-	dsdeEl(5,5) = g_yz*(ONE - d2)*(ONE - d3)
+	dsdeEl(5,5) = g_yz
 	dsdeEl(5,6) = 0
 	dsdeEl(6,1) = 0
 	dsdeEl(6,2) = 0 
 	dsdeEl(6,3) = 0
 	dsdeEl(6,4) = 0
 	dsdeEl(6,5) = 0
-	dsdeEl(6,6) = g_xz*(ONE - d3)*(ONE - d1)
+	dsdeEl(6,6) = g_xz
 
   
       
@@ -275,59 +267,40 @@ c *** Calculate current strain
          T_strain(i) =  Strain(i) + dStrain(i) 
       end do
 
- 
+      
+c**** Compute effective stress 
+      call vzero(sigma_eff, 6)
+      do i=1,ncomp
+          do j=1,ncomp
+              sigma_eff(i) = sigma_eff(i) + (dsdeEl(i,j)*T_strain(j))        
+          end do
+      end do        
+      
+
+
+      
 c****Damage initiation criteria
  
-      if (T_strain(1) >= 0) then
-          
-          
-          F_f_new = SQRT((T_strain(1)/eps_11_f_t)**2 + (T_strain(4) 
-     &       /eps_12_f)**2   + (T_strain(6)/eps_13_f)**2)
-          
-      else 
-          
-          F_f_new = SQRT((T_strain(1)/eps_11_f_c)**2)
-  
+      if (sigma_eff(1) >= 0) then                    
+          F_f_new = sigma_eff(1)/sig_11_f_t          
+      else           
+          F_f_new = sigma_eff(1)/sig_11_f_c  
       endif
+            
       
-      
-      
-      if (T_strain(2) + T_strain(3)>= 0)  then
-          
-          F_m_new =   SQRT(((T_strain(2) + T_strain(3))**2/(eps_22_f_t
-     &    *eps_33_f_t)) -  (T_strain(2)*T_strain(3)/eps_23_f**2) +  
-     &    (T_strain(4)/eps_12_f)**2 + (T_strain(6)/eps_13_f)**2 +
-     &     (T_strain(5)/eps_23_f)**2) 
-          
-      
-      else
-          
-          F_m_new =   SQRT(((T_strain(2) + T_strain(3))**2/(eps_22_f_c
-     &    *eps_33_f_c)) + ((T_strain(2)+T_strain(3)/eps_22_f_c)  
-     &    *((eps_22_f_c/2*eps_12_f)  - ONE)) -  
-     &    (T_strain(2)*T_strain(3)/eps_23_f**2) +  
-     &    (T_strain(4)/eps_12_f)**2 + (T_strain(6)/eps_13_f)**2 +
-     &     (T_strain(5)/eps_23_f)**2) 
-          
-      
+      if (sigma_eff(2)>= 0)  then         
+          F_m_new = sigma_eff(2)/sig_22_f_t     
+      else          
+          F_m_new = sigma_eff(2)/sig_22_f_c                
       endif
-      
-      
-      
-      if (T_strain(3) >= 0 )then
-      
-          F_z_new = SQRT((T_strain(3)/eps_33_f_t)**2 + (T_strain(6) 
-     &   /eps_13_f)**2  + (T_strain(5)/eps_23_f)**2) 
           
-      else 
       
-          F_z_new = SQRT((T_strain(3)/eps_33_f_c)**2 + (T_strain(6) 
-     &   /eps_13_f)**2  + (T_strain(5)/eps_23_f)**2)
-          
-          
+      if (sigma_eff(3) >= 0 )then      
+          F_z_new = sigma_eff(3)/sig_33_f_t           
+      else       
+          F_z_new = sigma_eff(3)/sig_33_f_c                     
       endif
-      
-      
+            
       
 c******    To make sure damage initiation criteria is greater than or equal to previous step   *******   
       
@@ -348,40 +321,85 @@ c******    To make sure damage initiation criteria is greater than or equal to p
       else          
           F_z = F_z          
       endif
+ 
       
       
-      call vzero(sigma, 6)
+      call vzero(sigma,6)
+      call vzero(inter,6)
       call vzero(C_T_1_a, 6) 
       call vzero(C_T_2_a, 6)
       call vzero(C_T_3_a, 6) 
-      if ((F_f**2 <= 1) .AND. (F_m**2 <= 1) .AND. (F_z**2 <= 1)) then
+      if ((F_f <= 1) .AND. (F_m <= 1) .AND. (F_z <= 1)) then
  
-c*********    Compute stress using Hooke's Law    **********
-          do i=1,ncomp
-             do j=1,ncomp
-                 sigma(i) = sigma(i) + (dsdeEl(i,j)*T_strain(j))        
-             end do
-          end do  
-       
+c********    Update stress
+        do i=1,ncomp
+           sigma(i) = sigma_eff(i)       
+        end do 
+          
+c********      Degraded stiffness   **********      
+        dsdeEl_d(1,1)=(ONE-yz_zy)/(young_y*young_z*delta)*(ONE
+     &                -d1)**2
+        dsdeEl_d(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
+     &              *(ONE - d1)*(ONE - d2)
+        dsdeEl_d(1,3) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)*
+     &              (ONE - d1)*(ONE - d3)
+        dsdeEl_d(1,4) = 0
+        dsdeEl_d(1,5) = 0
+        dsdeEl_d(1,6) = 0
+        dsdeEl_d(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)*
+     &              (ONE - d1)*(ONE - d2)
+        dsdeEl_d(2,2)=(ONE -zx_xz)/(young_x*young_z*delta)*(ONE - d2)**2
+        dsdeEl_d(2,3) = (pr_zy + pr_zx*pr_xy)/(young_x*young_z*delta)*
+     &              (ONE - d3)*(ONE - d2)
+        dsdeEl_d(2,4) = 0
+        dsdeEl_d(2,5) = 0
+        dsdeEl_d(2,6) = 0
+        dsdeEl_d(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta)*
+     &              (ONE - d3)*(ONE - d1)
+        dsdeEl_d(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)*
+     &              (ONE - d3)*(ONE- d2)
+        dsdeEl_d(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)*(ONE
+     &                -d3)**2
+        dsdeEl_d(3,4) = 0
+        dsdeEl_d(3,5) = 0
+        dsdeEl_d(3,6) = 0
+        dsdeEl_d(4,1) = 0
+        dsdeEl_d(4,2) = 0 
+        dsdeEl_d(4,3) = 0
+        dsdeEl_d(4,4) = g_xy*(ONE - d1)*(ONE - d2)
+        dsdeEl_d(4,5) = 0
+        dsdeEl_d(4,6) = 0
+        dsdeEl_d(5,1) = 0
+        dsdeEl_d(5,2) = 0 
+        dsdeEl_d(5,3) = 0
+        dsdeEl_d(5,4) = 0
+        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
+        dsdeEl_d(5,6) = 0
+        dsdeEl_d(6,1) = 0
+        dsdeEl_d(6,2) = 0 
+        dsdeEl_d(6,3) = 0
+        dsdeEl_d(6,4) = 0
+        dsdeEl_d(6,5) = 0
+        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2) 
       
       else
           
 c*********  Terms in damage evolution equations   ***********
-        if (T_strain(1) >= 0) then
+        if (sigma_eff(1) >= 0) then
           k1 =   (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1
         else 
           k1 =   (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1
         endif
         
         
-        if (T_strain(2) + T_strain(3) >= 0) then
+        if (sigma_eff(2)  >= 0) then
           k2 =  (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2
         else 
           k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2
         endif
       
         
-        if (T_strain(3) >= 0) then
+        if (sigma_eff(3) >= 0) then
           k3 =  (-sig_33_f_t*eps_33_f_t*L_c)/G_c_3
         else 
           k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3
@@ -389,20 +407,20 @@ c*********  Terms in damage evolution equations   ***********
        
 
 c*********   Damage evolution equations    *********** 	  
-        if (F_f**2 > 1) then
+        if (F_f > 1) then
       
-          d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f
+          d1_new =   ONE  - (exp(k1*(F_f - ONE)))/F_f
       
           if (d1_new > d1) then
               d1 = d1_new
           else
               d1 = d1
           endif
-         
+          
         endif        
 
       
-        if (F_m**2 > 1) then
+        if (F_m > 1) then
       
           d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m
       
@@ -411,22 +429,25 @@ c*********   Damage evolution equations    ***********
           else
               d2 = d2
           endif
-     
+        
         endif
       
       
-        if (F_z**2 > 1) then
+        if (F_z > 1) then
       
-          d3_new = ONE  - (exp(k3*(F_z - ONE)))/F_z
+          d3_new =  ONE  - (exp(k3*(F_z - ONE)))/F_z
       
           if (d3_new > d3) then
               d3 = d3_new
           else
               d3 = d3
           endif
-        
+           
         endif 
-      
+        
+        
+    
+     
 
 c********      Degraded stiffness   **********      
         dsdeEl_d(1,1)=(ONE-yz_zy)/(young_y*young_z*delta)*(ONE
@@ -465,17 +486,46 @@ c********      Degraded stiffness   **********
         dsdeEl_d(5,2) = 0 
         dsdeEl_d(5,3) = 0
         dsdeEl_d(5,4) = 0
-        dsdeEl_d(5,5) = g_yz*(ONE - d2)*(ONE - d3)
+        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
         dsdeEl_d(5,6) = 0
         dsdeEl_d(6,1) = 0
         dsdeEl_d(6,2) = 0 
         dsdeEl_d(6,3) = 0
         dsdeEl_d(6,4) = 0
         dsdeEl_d(6,5) = 0
-        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d1)
-         
+        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2)
         
-        if ((d1 == ZERO) .OR. (d1==ONE)) then
+        
+c*****      Inverse of the damage effect tensor  ********
+        
+        do i = 1,ncomp
+            do j= 1,ncomp
+                M(i,j) = ZERO
+            end do
+        end do
+        
+        M(1,1)  = 1/(1 - d1)
+        M(2,2)  = 1/(1 - d2)
+        M(3,3)  = 1/(1 - d3)
+        M(4,4)  = 1/sqrt((1 - d1)*(1 - d2))
+        M(5,5)  = 1/sqrt((1 - d3)*(1 - d2))
+        M(6,6)  = 1/sqrt((1 - d1)*(1 - d3))
+        
+        
+        do i=1,ncomp
+           do j=1,ncomp
+               inter(i) = inter(i) + (M(i,j)*T_strain(j))        
+           end do
+        end do  
+        
+c*******   Find nominal stress from effective stress ********
+        do i=1,ncomp
+           do j=1,ncomp
+               sigma(i) = sigma(i) + dsdeEl_d(i,j)*inter(j)        
+           end do
+        end do          
+        
+        if ((d1 == 0) .OR. (d1 == ONE))  then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -485,51 +535,30 @@ c********      Degraded stiffness   **********
           
         else
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d1(i,j) = 0        
-             end do
-          end do 
-          
-c*********     First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))  ************
-          d_C_d_d1(1,1) = -TWO*((ONE -yz_zy) / (young_y*young_z*delta))*
-     &                    (ONE - d1) 
-          d_C_d_d1(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                     delta))*(d2 - ONE)     
-          d_C_d_d1(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d1(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                     delta))*(d2 - ONE)
-          d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d1(4,4) = g_xy*(d2 -ONE)
-          d_C_d_d1(6,6) = g_xz*(d3 -ONE)
-          
-          
-c********   (d_C_d/d1 : eps)   **********          
-          do i=1,mcomp
-              do j=1,mcomp
-                  C_T_1_a(i) = C_T_1_a(i) + (d_C_d_d1(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_1_a = (/-sigma_eff(1),ZERO,ZERO,(d2 - 1)*sigma_eff(4),
+     &               ZERO,(d3 - 1)*sigma_eff(6) /) 
           
 c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   ***********
  
 c**       For Tension          
-          if (T_strain(1)> 0)  then
+          if (sigma_eff(1)> 0)  then
           
-            C_T_1_b  = (/ ((ONE - k1*F_f)/(F_f**3 * eps_11_f_t**2))
-     &     *exp(k1*(F_f - ONE))*T_strain(1), ZERO, ZERO,((ONE - k1*F_f)/ 
-     &     (F_f**3 * eps_12_f**2))*exp(k1*(F_f -ONE))*T_strain(4), ZERO,     
-     &     ((ONE - k1*F_f)/(F_f**3 * eps_13_f**2))*exp(k1*(F_f - ONE))
-     &     *T_strain(6)/)
+            C_T_1_b  = (/ ((ONE - k1*F_f)/(F_f**2 * sig_11_f_t*(1-d1)))
+     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
+     &     * sig_11_f_t*(1-d1)))*exp(k1*(F_f - ONE))*dsdeEl(1,2),
+     &    ((ONE-k1*F_f)/(F_f**2 * sig_11_f_t*(1-d1)))*exp(k1*(F_f-ONE))
+     &     *dsdeEl(1,3),ZERO,ZERO,ZERO/)
+            
+            
             
 c**       For Compression           
           else
               
-            C_T_1_b  = (/ ((ONE - k1*F_f)/(F_f**2 * eps_11_f_c))
-     &     *exp(k1*(F_f - ONE)),ZERO,ZERO,ZERO,ZERO,ZERO/)
-            
+            C_T_1_b  = (/ ((ONE - k1*F_f)/(F_f**2 * sig_11_f_c*(1-d1)))
+     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
+     &     * sig_11_f_c*(1-d1)))*exp(k1*(F_f - ONE))*dsdeEl(1,2),
+     &    ((ONE-k1*F_f)/(F_f**2 * sig_11_f_c*(1-d1)))*exp(k1*(F_f-ONE))
+     &     *dsdeEl(1,3),ZERO,ZERO,ZERO/)
             
           endif
       
@@ -543,7 +572,7 @@ c**       For Compression
             
         
 
-        if ((d2 == ZERO).OR. (d2==ONE))   then
+        if ((d2 == 0) .OR. (d2 == ONE))  then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -553,81 +582,28 @@ c**       For Compression
       
         else 
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d2(i,j) = 0        
-             end do
-          end do 
- 
-c*******   Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))    *********       
-          d_C_d_d2(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                    delta))*(d1 - ONE)
-          d_C_d_d2(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                    delta))*(d1 - ONE)
-          d_C_d_d2(2,2) = -TWO*((1 -zx_xz) / (young_x*young_z*
-     &                    delta))*(ONE - d2)
-          d_C_d_d2(2,3) =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d2(4,4) = g_xy*(d1 - ONE)
-          d_C_d_d2(5,5) = g_yz*(d3 - ONE)
-          
-c*****   (d_C_d/d2 : eps)         
-          do i=1,ncomp
-              do j=1,ncomp
-                  C_T_2_a(i) = C_T_2_a(i) + (d_C_d_d2(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_2_a = (/ZERO,-sigma_eff(2),ZERO,(d1 - 1)*sigma_eff(4)
+     &               ,(d3 - 1)*sigma_eff(5),ZERO /) 
           
 c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
       
 c****      For Tension           
-          if (T_strain(2) + T_strain(3)> 0)  then
+          if (sigma_eff(2)> 0)  then
           
-              term1 = (TWO*(T_strain(2) + T_strain(3))/(eps_22_f_t
-     &        *eps_33_f_t))  -  (T_strain(3)/eps_23_f**2)
-          
-              term2  =  (TWO*(T_strain(2) + T_strain(3))/(eps_22_f_t
-     &        *eps_33_f_t))  -  (T_strain(2)/eps_23_f**2)
-              
-              C_T_2_b=(/ZERO,(HALF)*((ONE-k2*F_m)/(F_m**3))*
-     &        exp(k2*(F_m -ONE))*term1, (HALF)*((1 - k2*F_m)
-     &        /(F_m**3))
-     &        *exp(k2*(F_m - ONE))*term2, ((ONE - k2*F_m)/
-     &        (F_m**3 *
-     &        eps_12_f**2))*exp(k2*(F_m - ONE))*T_strain(4), 
-     &        ((ONE - k2*F_m)/(F_m**3*eps_23_f**2))*
-     &        exp(k2*(F_m-1))*T_strain(5),    
-     &        ((ONE - k2*F_m)/(F_m**3 * eps_13_f**2))*
-     &        exp(k2*(F_m - ONE)) 
-     &        *T_strain(6) /)         
+            C_T_2_b  = (/ ((ONE - k2*F_m)/(F_m**2 * sig_22_f_t*(1-d2)))
+     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
+     &     * sig_22_f_t*(1-d2)))*exp(k2*(F_m - ONE))*dsdeEl(2,2),
+     &    ((ONE-k2*F_m)/(F_m**2 * sig_22_f_t*(1-d2)))*exp(k2*(F_m-ONE))
+     &     *dsdeEl(2,3),ZERO,ZERO,ZERO/) 
      
 c**       For Compression                       
-          else 
-                            
-              term1 = ((TWO*(T_strain(2) + T_strain(3))/(eps_22_f_c
-     &    *eps_33_f_c))  +  ((eps_22_f_c/(2*eps_12_f)) - ONE)/eps_22_f_c  
-     &     -  (T_strain(3)/eps_23_f**2))/(2*F_m)
+          else                                         
               
-              term2 = ((TWO*(T_strain(2) + T_strain(3))/(eps_22_f_c
-     &    *eps_33_f_c))  +  ((eps_22_f_c/(2*eps_12_f)) - ONE)/eps_22_f_c  
-     &     -  (T_strain(2)/eps_23_f**2))/(2*F_m) 
-              
-              
-              C_T_2_b  = (/ZERO, ((ONE - k2*F_m)/(F_m**2))*
-     &        exp(k2*(F_m - ONE))*term1, ((ONE - k2*F_m)
-     &        /(F_m**2))
-     &        *exp(k2*(F_m - ONE))*term2,  ((ONE - k2*F_m)
-     &        /(F_m**3 * 
-     &        eps_12_f**2))*exp(k2*(F_m - ONE))*T_strain(4), 
-     &        ((ONE - k2*F_m) 
-     &        /(F_m**3 * eps_23_f**2))*exp(k2*(F_m - ONE))
-     &        *T_strain(5),
-     &        ((ONE - k2*F_m)/(F_m**3 * eps_13_f**2))*
-     &        exp(k2*(F_m - ONE))
-     &        *T_strain(6) /)
-              
+            C_T_2_b  = (/ ((ONE - k2*F_m)/(F_m**2 * sig_22_f_c*(1-d2)))
+     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
+     &     * sig_22_f_c*(1-d2)))*exp(k2*(F_m - ONE))*dsdeEl(2,2),
+     &    ((ONE-k2*F_m)/(F_m**2 * sig_22_f_c*(1-d2)))*exp(k2*(F_m-ONE))
+     &     *dsdeEl(2,3),ZERO,ZERO,ZERO/)  
               
           endif
 
@@ -641,7 +617,7 @@ c**       For Compression
         endif      
       
       
-        if ((d3 == ZERO).OR. (d3==ONE))   then
+        if ((d3 == 0) .OR. (d3 == ONE))  then
       
               do i=1,ncomp
                  do j=1,ncomp
@@ -651,53 +627,28 @@ c**       For Compression
           
         else 
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d3(i,j) = 0        
-             end do
-          end do 
-          
-c*****  Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon)) 
-         d_C_d_d3(1,3)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d1 - ONE)
-         d_C_d_d3(2,3)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d2 - ONE) 
-         d_C_d_d3(3,1)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d1 - ONE) 
-         d_C_d_d3(3,2)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d2 - ONE) 
-         d_C_d_d3(3,3)  =  -TWO*((1 -xy_yx) / (young_x*young_y*
-     &                     delta))*(ONE - d3) 
-         d_C_d_d3(5,5)  =  g_yz*(d2 - ONE)     
-         d_C_d_d3(6,6)  =  g_xz*(d1 - ONE)  
-         
-         
-c*****      (d_C_d/d3 : eps)        
-          do i=1,ncomp
-              do j=1,ncomp
-                  C_T_3_a(i) = C_T_3_a(i) + (d_C_d_d3(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_3_a = (/ZERO,ZERO,-sigma_eff(3), ZERO,
+     &              (d2 - 1)*sigma_eff(5),(d1 - 1)*sigma_eff(6)/) 
           
 c*****     Derivative of d3 with respect to strain (d_d3/d_epsilon)
           
 c****     For Tension 
-          if (T_strain(3) > 0) then
+          if (sigma_eff(3) > 0) then
               
-              C_T_3_b =(/ZERO,ZERO,((ONE-k3*F_z)/(F_z**3*eps_33_f_t**2))
-     &    *exp(k3*(F_z - ONE))*T_strain(3),ZERO,((ONE - k3*F_z)/(F_z**3       
-     &    * eps_23_f**2))*exp(k3*(F_z -ONE))*T_strain(5),((ONE - k3*F_z)         
-     &    /(F_z**3 * eps_13_f**2))*exp(k3*(F_z - ONE))*T_strain(6) /)   
+            C_T_3_b  = (/ ((ONE - k3*F_z)/(F_z**2 * sig_33_f_t*(1-d3)))
+     &     *exp(k3*(F_z - ONE))*dsdeEl(3,1),  ((ONE - k3*F_z)/(F_z**2 
+     &     * sig_33_f_t*(1-d3)))*exp(k3*(F_z - ONE))*dsdeEl(3,2),
+     &    ((ONE-k3*F_z)/(F_z**2 * sig_33_f_t*(1-d3)))*exp(k3*(F_z-ONE))
+     &     *dsdeEl(3,3),ZERO,ZERO,ZERO/)   
               
 c****     For Compression              
           else 
               
-              C_T_3_b =(/ZERO,ZERO,((ONE-k3*F_z)/(F_z**3*eps_33_f_c**2))
-     &    *exp(k3*(F_z - ONE))*T_strain(3),ZERO,((ONE - k3*F_z)/(F_z**3       
-     &    * eps_23_f**2))*exp(k3*(F_z -ONE))*T_strain(5),((ONE - k3*F_z)         
-     &    /(F_z**3 * eps_13_f**2))*exp(k3*(F_z - ONE))*T_strain(6) /)
-              
-          
+            C_T_3_b  = (/ ((ONE - k3*F_z)/(F_z**2 * sig_33_f_c*(1-d3)))
+     &     *exp(k3*(F_z - ONE))*dsdeEl(3,1),  ((ONE - k3*F_z)/(F_z**2 
+     &     * sig_33_f_c*(1-d3)))*exp(k3*(F_z - ONE))*dsdeEl(3,2),
+     &    ((ONE-k3*F_z)/(F_z**2 * sig_33_f_c*(1-d3)))*exp(k3*(F_z-ONE))
+     &     *dsdeEl(3,3),ZERO,ZERO,ZERO/)  
           endif
           
           do i = 1,mcomp
@@ -707,15 +658,10 @@ c****     For Compression
           end do 
           
         endif
-              
-c********    Compute stress              
-        do i=1,ncomp
-          do j=1,ncomp
-              sigma(i) = sigma(i) + (dsdeEl_d(i,j)*T_strain(j))        
-          end do
-        end do 
+
   
-c*********   Tangent stiffness     
+  
+c*********   Tangent stiffness  
         do i=1,ncomp
            do j=1,ncomp
               C_T(i,j)   =  dsdeEl_d(i,j) +  C_T_1(i,j) + C_T_2(i,j) +
@@ -734,22 +680,22 @@ c*********   Tangent stiffness
       ustatev(6) = F_m
       ustatev(7) = F_z
       
-
-      
- 
       
 c *** Update stress i
       do i=1,ncomp
          stress(i) = sigma(i)
       end do
       
+ 
 
       
-      if ((F_f**2 <= 1) .AND. (F_m**2 <= 1) .AND. (F_z**2 <= 1)) then
+
+      
+      if ((F_f <= 1) .AND. (F_m <= 1) .AND. (F_z <= 1)) then
           
           do i=1,ncomp
               do j=1,ncomp
-                  dsdePl(i,j) = dsdeEl(i,j)        
+                  dsdePl(i,j) = dsdeEl_d(i,j)        
               end do
           end do 
       

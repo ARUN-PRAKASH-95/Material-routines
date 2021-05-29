@@ -253,7 +253,7 @@ else
     
     if F_m > 1
        
-      d2_new = 1  -  (exp(-P2*(eps(2) - epsilon_m)))    %d2
+      d2_new = 1  -  (exp(-P2*(eps(2) - epsilon_m)));    %d2
       
       if d2_new >= d2
           d2 = d2_new;
@@ -267,7 +267,7 @@ else
     
     if F_z > 1
       
-      d3_new  = 1  -  (exp(-P3*(eps(3) - epsilon_z)))    %d3
+      d3_new  = 1  -  (exp(-P3*(eps(3) - epsilon_z)));    %d3
       
       if d3_new >= d3
           d3 = d3_new;

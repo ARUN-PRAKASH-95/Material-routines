@@ -149,7 +149,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,V,key,ans,V2,value
+     &                    F_m_new,F_z_new,V
 
       
       
@@ -159,7 +159,13 @@ c
 
  
 
-
+      V    = ustatev(1)
+      d1   = ustatev(2)
+      d2   = ustatev(3)
+      d3   = ustatev(4)
+      F_f  = ustatev(5)
+      F_m  = ustatev(6)
+      F_z  = ustatev(7) 
       
 c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	young_x  = prop(1)
@@ -199,13 +205,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
 
-      
-      d1   = ustatev(1)
-      d2   = ustatev(2)
-      d3   = ustatev(3)
-      F_f  = ustatev(4)
-      F_m  = ustatev(5)
-      F_z  = ustatev(6)
+
 	
 
 
@@ -255,7 +255,8 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	dsdeEl(6,5) = 0
 	dsdeEl(6,6) = g_xz*(ONE - d3)*(ONE - d2)
 
-  
+      tsstif(1) = g_xz
+      tsstif(2) = g_yz    
       
       eps_11_f_t = sig_11_f_t / ((ONE -yz_zy) / (young_y*young_z*delta))
       eps_11_f_c = sig_11_f_c / ((ONE -yz_zy) / (young_y*young_z*delta))
@@ -690,12 +691,13 @@ c*********   Tangent stiffness
       endif
       
 
-      ustatev(1) = d1
-      ustatev(2) = d2
-      ustatev(3) = d3
-      ustatev(4) = F_f
-      ustatev(5) = F_m
-      ustatev(6) = F_z
+      ustatev(2) = d1
+      ustatev(3) = d2
+      ustatev(4) = d3
+      ustatev(5) = F_f
+      ustatev(6) = F_m
+      ustatev(7) = F_z
+
       
 
       

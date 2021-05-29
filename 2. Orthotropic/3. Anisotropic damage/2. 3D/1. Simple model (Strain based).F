@@ -149,7 +149,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,V,key,ans,V2,value
+     &                    F_m_new,F_z_new,V,key,ans,V2,value,L_c
 
       
       
@@ -176,9 +176,9 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
       sig_22_f_t = 50e6
-      sig_22_f_c = -150e6
+      sig_22_f_c = -200e6
       sig_33_f_t = 50e6
-      sig_33_f_c = -150e6
+      sig_33_f_c = -200e6
       sig_12_f   = 50e6
       sig_13_f   = 50e6
       sig_23_f   = 50e6
@@ -199,16 +199,18 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
 
-      
-      d1   = ustatev(1)
-      d2   = ustatev(2)
-      d3   = ustatev(3)
-      F_f  = ustatev(4)
-      F_m  = ustatev(5)
-      F_z  = ustatev(6)
+      V    = ustatev(1)
+      d1   = ustatev(2)
+      d2   = ustatev(3)
+      d3   = ustatev(4)
+      F_f  = ustatev(5)
+      F_m  = ustatev(6)
+      F_z  = ustatev(7)
 	
+      L_c  = V**(1/3)
 
-
+      tsstif(1) = g_xz
+      tsstif(2) = g_yz  
      
 ********* ELASTIC STIFFNESS MATRIX *********
 	
@@ -664,12 +666,12 @@ c*********   Tangent stiffness
       endif
       
 
-      ustatev(1) = d1
-      ustatev(2) = d2
-      ustatev(3) = d3
-      ustatev(4) = F_f
-      ustatev(5) = F_m
-      ustatev(6) = F_z
+      ustatev(2) = d1
+      ustatev(3) = d2
+      ustatev(4) = d3
+      ustatev(5) = F_f
+      ustatev(6) = F_m
+      ustatev(7) = F_z
       
 
       

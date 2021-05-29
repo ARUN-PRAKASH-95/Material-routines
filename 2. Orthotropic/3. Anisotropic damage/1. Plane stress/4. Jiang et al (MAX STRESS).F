@@ -126,13 +126,9 @@ c
      &                  sigi (mcomp), C_T(mcomp,mcomp),
      &                  dsdeEl_d(mcomp,mcomp), T_strain(mcomp),
      &                  id(3,3), C_T_1(mcomp,mcomp),M_inv(mcomp,mcomp),
-     &                  d_C_d_d1(mcomp,mcomp), C_T_1_a(mcomp), 
+     &                  C_T_1_a(mcomp), sigma_eff(mcomp),
      &                  C_T_1_b(mcomp), C_T_2(mcomp,mcomp), 
-     &                  d_C_d_d2(mcomp,mcomp), C_T_2_a(mcomp),
-     &                  C_T_2_b(mcomp),C_T_3(mcomp,mcomp), 
-     &                  d_C_d_d3(mcomp,mcomp), C_T_3_a(mcomp),
-     &                  C_T_3_b(mcomp),sigma_eff(mcomp)
-                  
+     &                  C_T_2_a(mcomp),C_T_2_b(mcomp)
 
       
       integer             i,j,k,l,n,P,ielem,iiter,key
@@ -256,7 +252,6 @@ c******    To make sure damage initiation criteria is greater than or equal to p
       call vzero(sigma,3)
       call vzero(C_T_1_a, 6) 
       call vzero(C_T_2_a, 6)
-      call vzero(C_T_3_a, 6) 
       if ((F_f <= 1) .AND. (F_m <= 1)) then
  
 c********    Update stress
@@ -369,25 +364,8 @@ c********      Degraded stiffness   **********
           
         else
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d1(i,j) = 0        
-             end do
-          end do 
-          
-c*********     First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))  ************          d_C_d_d1(1,1) = -young_x/D**2
-          d_C_d_d1(1,2) = ((d2 - ONE)*pr_xy*young_y)/(D**2)
-          d_C_d_d1(2,1) = ((d2 - ONE)*pr_xy*young_y)/(D**2)
-          d_C_d_d1(2,2) = ((d2 - ONE)**2*pr_xy*pr_yx*young_y)/(D**2)            d_C_d_d1(3,3) =  g_xy*(1 - d2)
-          
-          
-          
-c********   (d_C_d/d1 : eps)   **********          
-          do i=1,mcomp
-              do j=1,mcomp
-                  C_T_1_a(i) = C_T_1_a(i) + (d_C_d_d1(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_1_a = (/-sigma_eff(1),ZERO,(1 - d2)*sigma_eff(3)/)
+
           
 c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   ***********
  
@@ -429,25 +407,8 @@ c**       For Compression
       
         else 
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d2(i,j) = 0        
-             end do
-          end do 
- 
-c*******   Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))    *********       
-          d_C_d_d2(1,1) = ((d1 - ONE)**2*pr_xy*pr_yx*young_x)/(D**2) 
-          d_C_d_d2(1,2) = ((d1 - ONE)*pr_xy*young_y)/(D**2)
-          d_C_d_d2(2,1) = ((d1 - ONE)*pr_xy*young_y)/(D**2)
-          d_C_d_d2(2,2) = -young_y/D**2
-          d_C_d_d2(3,3) =  g_xy*(1 - d1)
-          
-c*****   (d_C_d/d2 : eps)         
-          do i=1,ncomp
-              do j=1,ncomp
-                  C_T_2_a(i) = C_T_2_a(i) + (d_C_d_d2(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_2_a = (/ZERO,-sigma_eff(2),(1 - d1)*sigma_eff(3)/)
+
           
 c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
       
@@ -482,8 +443,7 @@ c**       For Compression
 c*********   Tangent stiffness  
         do i=1,ncomp
            do j=1,ncomp
-              C_T(i,j)   =  dsdeEl_d(i,j) +  C_T_1(i,j) + C_T_2(i,j) +
-     &        C_T_3(i,j) 
+              C_T(i,j)   =  dsdeEl_d(i,j) +  C_T_1(i,j) + C_T_2(i,j)  
            end do
         end do
       

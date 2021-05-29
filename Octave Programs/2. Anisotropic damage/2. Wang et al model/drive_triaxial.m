@@ -103,7 +103,7 @@ for n=1:steps
          epsilon(4:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_strain(epsilon,sdv(:,n),ttype);
         
         % 3.) partitioning
         sbar=partitiontri(s);
@@ -164,7 +164,7 @@ ylabel('\sigma_{11}')
 figure(3);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e22,s22,'or-')
+plot(e22,s22,'ob-')
 legend('\sigma_{22}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{22}')
 ylabel('\sigma_{22}')
@@ -186,14 +186,14 @@ ylabel('d1')
 
 % plot damage
 figure(6)
-plot(e22,sdv(2,:),'or-')
+plot(e22,sdv(2,:),'ob-')
 legend('d2','Ref.','Location','West')
 xlabel('\epsilon_{22}')
 ylabel('d2')
 
 % plot damage
 figure(7)
-plot(e33,sdv(3,:),'or-')
+plot(e33,sdv(3,:),'og-')
 legend('d3','Ref.','Location','West')
 xlabel('\epsilon_{33}')
 ylabel('d3')

@@ -152,13 +152,6 @@ c
 	
 
  
-      damage = ustatev(1)
-      d1     = ustatev(2)
-      d2     = ustatev(3)
-      d3     = ustatev(4)
-      F_f    = ustatev(5)
-      F_m    = ustatev(6)
-      F_z    = ustatev(7)
 
 
       
@@ -201,6 +194,13 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
 
       
+      damage = ustatev(1)
+      d1     = ustatev(2)
+      d2     = ustatev(3)
+      d3     = ustatev(4)
+      F_f    = ustatev(5)
+      F_m    = ustatev(6)
+      F_z    = ustatev(7)
 
      
 ********* ELASTIC STIFFNESS MATRIX *********
@@ -243,7 +243,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	dsdeEl(6,6) = g_xz
 
       tsstif(1) = g_xz
-      tsstif(2) = g_yz   
+      tsstif(2) = g_yz     
       
       eps_11_f_t = sig_11_f_t / ((ONE -yz_zy) / (young_y*young_z*delta))
       eps_11_f_c = sig_11_f_c / ((ONE -yz_zy) / (young_y*young_z*delta))

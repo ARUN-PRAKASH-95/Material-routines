@@ -32,7 +32,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.2];
+    lam=[0 0.5];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -72,7 +72,7 @@ eps22=zeros(1,steps); eps33=zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-4;
 maxit=100;
-ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -154,7 +154,7 @@ figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
 plot(e11,s11,'or-')
-legend('\sigma_{11}','Ref.','Location','SouthEast')
+legend('\sigma_{11}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
 ylabel('\sigma_{11}')
  
@@ -176,6 +176,7 @@ plot(e11,sdv(1,:),'or-')
 legend('d1','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d1')
+
 
 % plot damage
 figure(5)

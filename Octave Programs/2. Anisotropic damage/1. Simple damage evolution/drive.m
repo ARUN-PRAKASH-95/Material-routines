@@ -72,7 +72,7 @@ eps22=zeros(1,steps); eps33=zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-4;
 maxit=100;
-ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_stress_jiang(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_strain(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -154,9 +154,9 @@ figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
 plot(e11,s11,'or-')
-legend('\sigma_{11}','Ref.','Location','NorthWest')
-xlabel('eps11')
-ylabel('sig11')
+legend('\sigma_{11}','Ref.','Location','NorthEast')
+xlabel('\epsilon_{11}')
+ylabel('\sigma_{11}')
  
 
  
@@ -165,9 +165,10 @@ figure(3)
 plot(e11,eps22,'ob-')
 hold on
 plot(e11,eps33,'og-')
+title('Computed using Algorithmic tangent')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','SouthEast')
-xlabel('eps11')
-ylabel('eps22, eps33')
+xlabel('\epsilon_{11}')
+ylabel('\epsilon_{22},\epsilon_{33}')
 
 
 % plot damage

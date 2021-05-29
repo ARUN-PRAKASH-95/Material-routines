@@ -29,7 +29,7 @@ addpath('analyt_sol/');
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=1;
+ltype=3;
 if ltype==1
     t=[0 10];
     lam=[0 0.2];
@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_hashins_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -135,7 +135,7 @@ close(wb)
 
 data = [time; e11; s11; eps22; eps33;];
 
-fileID = fopen('output_hashins_stress_NT.txt','w');
+fileID = fopen('output_max_stress_C_d.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}','Epsilon_{33}');
 fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%3.1f %15.5f %15.5f %15.5f %15.5f\n',data);
@@ -154,7 +154,7 @@ figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
 plot(e11,s11,'or-')
-legend('\sigma_{11}','Ref.','Location','NorthEast')
+legend('G_c_1 = 12.5e7 N/m','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
 ylabel('\sigma_{11}')
  
@@ -173,21 +173,21 @@ ylabel('\epsilon_{22},\epsilon_{33}')
 % plot damage
 figure(4)
 plot(e11,sdv(1,:),'or-')
-legend('d1','Ref.','Location','West')
+legend('G_c_1 = 12.5e7 N/m','Ref.','Location','East')
 xlabel('\epsilon_{11}')
 ylabel('d1')
 
 % plot damage
 figure(5)
 plot(e11,sdv(2,:),'or-')
-legend('d2','Ref.','Location','West')
+legend('G_c_2 = 1e7 N/m','Ref.','Location','SouthEast')
 xlabel('\epsilon_{11}')
 ylabel('d2')
 
 % plot damage
 figure(6)
 plot(e11,sdv(3,:),'or-')
-legend('d3','Ref.','Location','West')
+legend('G_c_2 = 1e7 N/m','Ref.','Location','SouthEast')
 xlabel('\epsilon_{11}')
 ylabel('d3')
 

@@ -126,11 +126,11 @@ c
      &                  sigi (mcomp), C_T(mcomp,mcomp),
      &                  dsdeEl_d(mcomp,mcomp), T_strain(mcomp),
      &                  id(3,3), C_T_1(mcomp,mcomp),M_inv(mcomp,mcomp),
-     &                  d_C_d_d1(mcomp,mcomp), C_T_1_a(mcomp), 
+     &                  C_T_1_a(mcomp), 
      &                  C_T_1_b(mcomp), C_T_2(mcomp,mcomp), 
-     &                  d_C_d_d2(mcomp,mcomp), C_T_2_a(mcomp),
+     &                  C_T_2_a(mcomp),
      &                  C_T_2_b(mcomp),C_T_3(mcomp,mcomp), 
-     &                  d_C_d_d3(mcomp,mcomp), C_T_3_a(mcomp),
+     &                  C_T_3_a(mcomp),
      &                  C_T_3_b(mcomp),sigma_eff(mcomp)
                   
 
@@ -148,7 +148,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,V,eta,T_f,T_m,T_z
+     &                    F_m_new,F_z_new,V
 
       
       
@@ -156,7 +156,13 @@ c
      &                    var6, var7, var8
 	
 
- 
+      V    = ustatev(1)
+      d1   = ustatev(2)
+      d2   = ustatev(3)
+      d3   = ustatev(4)
+      F_f  = ustatev(5)
+      F_m  = ustatev(6)
+      F_z  = ustatev(7)  
       
 c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	young_x  = prop(1)
@@ -179,9 +185,9 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_12_f   = 50e6
       sig_13_f   = 50e6
       sig_23_f   = 50e6
-      G_c_1      = 12.5e3
-      G_c_2      = 1e3
-      G_c_3      = 1e3
+      G_c_1      = 12.5e7
+      G_c_2      = 1e7
+      G_c_3      = 1e7
       L_c        = 1.25**(1/3)
     
    
@@ -199,13 +205,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
 
-      
-      d1   = ustatev(1)
-      d2   = ustatev(2)
-      d3   = ustatev(3)
-      F_f  = ustatev(4)
-      F_m  = ustatev(5)
-      F_z  = ustatev(6)
+
 	
 
 
@@ -520,7 +520,7 @@ c********      Degraded stiffness   **********
         dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2)
          
         
-        if (d1 == 0) then
+        if ((d1 == 0) .OR. (d1 == ONE)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -530,33 +530,9 @@ c********      Degraded stiffness   **********
           
         else
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d1(i,j) = 0        
-             end do
-          end do 
-          
-c*********     First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))  ************
-          d_C_d_d1(1,1) = -TWO*((ONE -yz_zy) / (young_y*young_z*delta))*
-     &                    (ONE - d1) 
-          d_C_d_d1(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                     delta))*(d2 - ONE)     
-          d_C_d_d1(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d1(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                     delta))*(d2 - ONE)
-          d_C_d_d1(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d1(4,4) = g_xy*(d2 -ONE)
-          d_C_d_d1(6,6) = g_xz*(d3 -ONE)
-          
-          
-c********   (d_C_d/d1 : eps)   **********          
-          do i=1,mcomp
-              do j=1,mcomp
-                  C_T_1_a(i) = C_T_1_a(i) + (d_C_d_d1(i,j)*T_strain(j)) 
-              end do
-          end do 
+            
+          C_T_1_a = (/-sigma_eff(1),ZERO,ZERO,(d2 - 1)*sigma_eff(4),
+     &               ZERO,(d3 - 1)*sigma_eff(6) /) 
           
 c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   ***********
  
@@ -595,7 +571,7 @@ c**       For Compression
             
         
 
-        if (d2 == 0) then
+        if ((d2 == 0) .OR. (d2 == ONE))  then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -605,32 +581,8 @@ c**       For Compression
       
         else 
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d2(i,j) = 0        
-             end do
-          end do 
- 
-c*******   Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))    *********       
-          d_C_d_d2(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                    delta))*(d1 - ONE)
-          d_C_d_d2(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*
-     &                    delta))*(d1 - ONE)
-          d_C_d_d2(2,2) = -TWO*((1 -zx_xz) / (young_x*young_z*
-     &                    delta))*(ONE - d2)
-          d_C_d_d2(2,3) =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d2(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d3 - ONE)
-          d_C_d_d2(4,4) = g_xy*(d1 - ONE)
-          d_C_d_d2(5,5) = g_yz*(d3 - ONE)
-          
-c*****   (d_C_d/d2 : eps)         
-          do i=1,ncomp
-              do j=1,ncomp
-                  C_T_2_a(i) = C_T_2_a(i) + (d_C_d_d2(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_2_a = (/ZERO,-sigma_eff(2),ZERO,(d1 - 1)*sigma_eff(4)
+     &               ,(d3 - 1)*sigma_eff(5),ZERO /) 
           
 c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
       
@@ -678,7 +630,7 @@ c**       For Compression
         endif      
       
       
-        if (d3 == 0) then
+        if ((d3 == 0) .OR. (d3 == ONE)) then
       
               do i=1,ncomp
                  do j=1,ncomp
@@ -688,33 +640,8 @@ c**       For Compression
           
         else 
             
-          do i=1,mcomp
-             do j=1,mcomp
-                 d_C_d_d3(i,j) = 0        
-             end do
-          end do 
-          
-c*****  Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon)) 
-         d_C_d_d3(1,3)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d1 - ONE)
-         d_C_d_d3(2,3)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d2 - ONE) 
-         d_C_d_d3(3,1)  =  ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*
-     &                     delta))*(d1 - ONE) 
-         d_C_d_d3(3,2)  =  ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*
-     &                     delta))*(d2 - ONE) 
-         d_C_d_d3(3,3)  =  -TWO*((1 -xy_yx) / (young_x*young_y*
-     &                     delta))*(ONE - d3) 
-         d_C_d_d3(5,5)  =  g_yz*(d2 - ONE)     
-         d_C_d_d3(6,6)  =  g_xz*(d1 - ONE)  
-         
-         
-c*****      (d_C_d/d3 : eps)        
-          do i=1,ncomp
-              do j=1,ncomp
-                  C_T_3_a(i) = C_T_3_a(i) + (d_C_d_d3(i,j)*T_strain(j)) 
-              end do
-          end do 
+          C_T_3_a = (/ZERO,ZERO,-sigma_eff(3), ZERO,
+     &              (d2 - 1)*sigma_eff(5),(d1 - 1)*sigma_eff(6)/) 
           
 c*****     Derivative of d3 with respect to strain (d_d3/d_epsilon)
           
@@ -768,14 +695,12 @@ c*********   Tangent stiffness
       endif
       
 
-      ustatev(1) = d1
-      ustatev(2) = d2
-      ustatev(3) = d3
-      ustatev(4) = F_f
-      ustatev(5) = F_m
-      ustatev(6) = F_z
-      
-
+      ustatev(2) = d1
+      ustatev(3) = d2
+      ustatev(4) = d3
+      ustatev(5) = F_f
+      ustatev(6) = F_m
+      ustatev(7) = F_z
       
  
       

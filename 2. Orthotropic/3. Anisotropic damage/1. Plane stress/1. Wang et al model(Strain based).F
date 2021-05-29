@@ -155,8 +155,13 @@ c
       double precision    var0, var1, var2, var3, var4, var5,
      &                    var6, var7, var8
 	
-
- 
+      
+      V    = ustatev(1) 
+      d1   = ustatev(2)
+      d2   = ustatev(3)
+      d3   = ONE - ((ONE - d1)*(ONE - d2))
+      F_f  = ustatev(4)
+      F_m  = ustatev(5) 
       
 c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	young_x  = prop(1)
@@ -169,20 +174,16 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
       sig_22_f_t = 50e6
-      sig_22_f_c = -150e6
+      sig_22_f_c = -200e6
       sig_12_f   = 50e6
-      G_c_1      = 12.5e3
-      G_c_2      = 1e3
-      G_c_3      = 1e3
-      L_c        = 1**(1/3)
+      G_c_1      = 12.5e7
+      G_c_2      = 1e7
+      G_c_3      = 1e7
+      L_c        = V**(1/3)
     
    
       
-      d1   = ustatev(1)
-      d2   = ustatev(2)
-      d3   = ONE - ((ONE - d1)*(ONE - d2))
-      F_f  = ustatev(3)
-      F_m  = ustatev(4)
+
 	
 
 ********* ELASTIC STIFFNESS MATRIX *********
@@ -197,6 +198,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       dsdeEl(3,2) = ZERO
       dsdeEl(3,3) = g_xy*(ONE-d3)
 
+      tsstif(1) = g_xy
 
   
       
@@ -314,7 +316,7 @@ c*********   Damage evolution equations    ***********
           d2_new =  ONE  - (exp(k2*(F_m - ONE)))/F_m
       
           if (d2_new > d2) then
-              d2 = d2_new
+              d2 = ZERO
           else
               d2 = d2
           endif
@@ -339,7 +341,7 @@ c********      Degraded stiffness   **********
 
          
         
-        if (d1 == 0) then
+        if ((d1 == ZERO) .OR. (d1==ONE)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -396,7 +398,7 @@ c**       For Compression
         endif
             
 
-        if (d2 == 0) then
+        if ((d2 == ZERO) .OR. (d2==ONE))then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -482,10 +484,10 @@ c*********   Tangent stiffness
       endif
       
 
-      ustatev(1) = d1
-      ustatev(2) = d2
-      ustatev(3) = F_f
-      ustatev(4) = F_m
+      ustatev(2) = d1
+      ustatev(3) = d2
+      ustatev(4) = F_f
+      ustatev(5) = F_m
   
       
 

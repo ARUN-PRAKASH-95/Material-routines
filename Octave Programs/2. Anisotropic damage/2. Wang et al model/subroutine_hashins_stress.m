@@ -184,9 +184,7 @@ else
 end
 
 
-F_f
-F_m
-F_z
+
 
 
 
@@ -362,7 +360,7 @@ else
     C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
     C_d;
     
-    if d1 == 0
+    if d1 == 0 | d1==0
       
       C_T_1 = zeros(6,6);   
       
@@ -388,14 +386,14 @@ else
         C_T_1_b  =  [ ((1 - k1*F_f)/(F_f**3 * sig_11_f_c**2 *(1-d1) ))*exp(k1*(F_f - 1))*sig6_eff(1)*C(1,1); ((1 - k1*F_f)/(F_f**3 * sig_11_f_c**2 *(1-d1) ))*exp(k1*(F_f - 1))*sig6_eff(1)*C(1,2); ((1 - k1*F_f)/(F_f**3 * sig_11_f_c**2 *(1-d1) ))*exp(k1*(F_f - 1))*sig6_eff(1)*C(1,3); 0; 0; 0;];
        
       endif
-        
+     
       C_T_1  =  C_T_1_a*C_T_1_b';
-    
+      
     endif
     
     
 
-    if d2 == 0
+    if d2 == 0 | d2==0
       
       C_T_2  =  zeros(6,6);
      
@@ -429,7 +427,7 @@ else
     
     
     
-   if d3  == 0
+   if d3  == 0 | d3==0
      
      C_T_3  =  zeros(6,6);
    
@@ -498,7 +496,7 @@ elseif ttype == 1
         
     end
     A66=A66_num;
-    
+    A66
 end
 
 

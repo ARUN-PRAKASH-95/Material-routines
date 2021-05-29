@@ -1,4 +1,4 @@
-function [sig6,A66,sdvl]=subroutine(eps6,sdvl,ttype)
+function [sig6,A66,sdvl]=subroutine_strain(eps6,sdvl,ttype)
 
 
 
@@ -45,7 +45,7 @@ delta = (1 - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz;
 
 % restore the strain tensor in voigt notation
 eps = [eps6(1); eps6(2); eps6(3); eps6(4); eps6(5); eps6(6);];
-
+eps
 % restore the strain tensor
 eps_tensor = [eps6(1) eps6(4)/2 eps6(6)/2;
               eps6(4)/2 eps6(2) eps6(5)/2;
@@ -105,12 +105,12 @@ C(6,6) = g_xz*(1 - d3)*(1 - d1);
 C;
 
 
-eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta))
+eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_11_f_c = sig_11_f_c / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_22_f_t = sig_22_f_t / ((1 -zx_xz) / (young_x*young_z*delta));
 eps_22_f_c = sig_22_f_c / ((1 -zx_xz) / (young_x*young_z*delta));
 eps_33_f_t = sig_33_f_t / ((1 -xy_yx) / (young_x*young_y*delta));
-eps_33_f_c = sig_33_f_c / ((1 -xy_yx) / (young_x*young_y*delta))
+eps_33_f_c = sig_33_f_c / ((1 -xy_yx) / (young_x*young_y*delta));
 eps_12_f   = sig_12_f / g_xy;
 eps_13_f   = sig_13_f / g_xz;
 eps_23_f   = sig_23_f / g_yz;
@@ -193,7 +193,7 @@ if F_f<=1 && F_m<=1 && F_z<=1
     end
     
     C_T  =  C;
-    sig6
+  
 
     
 else
@@ -202,7 +202,7 @@ else
 %%%%%%  Terms in damage evolution equations  %%%%%%%%
     if eps(1) >= 0
 
-       epsilon_f = eps_11_f_t
+       epsilon_f = eps_11_f_t;
        P1 = 25;
     elseif eps(1) < 0
    
@@ -512,19 +512,13 @@ elseif ttype == 1
         %recursiv call of your material routine with ttype=0 to avoid
         %endless loop
         %Calculate perturbed stress, sdv are not overwritten
-        [sig6per,Adummy,sdvldummy] = subroutine(epsper,sdvl,0);
+        [sig6per,Adummy,sdvldummy] = subroutine_strain(epsper,sdvl,0);
         %Simple differential quotient
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         
     end
     A66=A66_num;
-    %A66(1,4)=A66(1,5)=A66(1,6)=0;
-    %A66(2,4)=A66(2,5)=A66(2,6)=0;
-    %A66(3,4)=A66(3,5)=A66(3,6)=0;
-    A66
-    vec = [1,2,3,4,5,6];
-    
-    PD_NT = vec*A66*vec'
+
 end
 
 

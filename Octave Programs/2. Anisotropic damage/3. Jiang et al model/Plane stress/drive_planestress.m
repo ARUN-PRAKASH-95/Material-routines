@@ -125,7 +125,7 @@ end % for
 fprintf('********************\n')
 close(wb)
 %
-s
+
 %fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);

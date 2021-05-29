@@ -149,7 +149,7 @@ figure(2);
 plot(e11,s11,'or-')
 legend('\sigma_{11}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
-ylabel('\sigma_{11}')
+ylabel('\sigma_{11} (N/m^2)')
  
 
  
@@ -158,7 +158,7 @@ figure(3)
 plot(e11,eps22,'ob-')
 hold on
 plot(e11,eps33,'og-')
-title('Computed using Numerical pertubration')
+title('Computed using Numerical perturbation')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
 ylabel('\epsilon_{22},\epsilon_{33}')
@@ -167,6 +167,6 @@ ylabel('\epsilon_{22},\epsilon_{33}')
 % plot damage
 figure(4)
 plot(e11,sdv(1,:),'or-')
-legend('damage','Ref.','Location','East')
-xlabel('eps11')
+legend('P = 1000','Ref.','Location','East')
+xlabel('\epsilon_{11}')
 ylabel('damage')
