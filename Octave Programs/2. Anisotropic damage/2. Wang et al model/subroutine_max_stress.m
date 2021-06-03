@@ -189,43 +189,7 @@ sig6 = zeros(6,1);
 if F_f<=1 && F_m<=1 && F_z<=1
   
     sig6 = sig6_eff;
-    C_T = zeros(6,6);
-    C_T(1,1) = ((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1)**2;
-    C_T(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_T(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d1)*(1 - d3);
-    C_T(1,4) = 0;
-    C_T(1,5) = 0;
-    C_T(1,6) = 0;
-    C_T(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_T(2,2) = ((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2)**2;
-    C_T(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_T(2,4) = 0;
-    C_T(2,5) = 0;
-    C_T(2,6) = 0;
-    C_T(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d3)*(1 - d1);
-    C_T(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_T(3,3) = ((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3)**2;
-    C_T(3,4) = 0;
-    C_T(3,5) = 0;
-    C_T(3,6) = 0;
-    C_T(4,1) = 0;
-    C_T(4,2) = 0;
-    C_T(4,3) = 0;
-    C_T(4,4) = g_xy*(1 - d1)*(1 - d2);
-    C_T(4,5) = 0;
-    C_T(4,6) = 0;
-    C_T(5,1) = 0;
-    C_T(5,2) = 0;
-    C_T(5,3) = 0;
-    C_T(5,4) = 0;
-    C_T(5,5) = g_yz*(1 - d2)*(1 - d3);
-    C_T(5,6) = 0;
-    C_T(6,1) = 0;
-    C_T(6,2) = 0;
-    C_T(6,3) = 0;
-    C_T(6,4) = 0;
-    C_T(6,5) = 0;
-    C_T(6,6) = g_xz*(1 - d3)*(1 - d1);
+    C_T = C;
 
     
 else
@@ -233,7 +197,7 @@ else
 
 %%%%%%  Terms in damage evolution equations  %%%%%%%%
     if sig6_eff(1) >= 0
-      k1 = (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1;      
+      k1 = (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1;    
     elseif sig6_eff(1) < 0   
       k1 = (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1;      
     endif
@@ -295,7 +259,7 @@ else
       end
       
     endif
-    d1
+    d1;
     d2;
     d3;
 
@@ -315,47 +279,10 @@ else
           sig6(i) = sig6(i) + M_inv(i,j)*sig6_eff(j);
        end
     end    
-    C_T_0 = M_inv*C
+    
    
 %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%
-    C_d = zeros(6,6);
-    C_d(1,1) = ((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1)**2;
-    C_d(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_d(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d1)*(1 - d3);
-    C_d(1,4) = 0;
-    C_d(1,5) = 0;
-    C_d(1,6) = 0;
-    C_d(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_d(2,2) = ((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2)**2;
-    C_d(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_d(2,4) = 0;
-    C_d(2,5) = 0;
-    C_d(2,6) = 0;
-    C_d(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d3)*(1 - d1);
-    C_d(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_d(3,3) = ((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3)**2;
-    C_d(3,4) = 0;
-    C_d(3,5) = 0;
-    C_d(3,6) = 0;
-    C_d(4,1) = 0;
-    C_d(4,2) = 0;
-    C_d(4,3) = 0;
-    C_d(4,4) = g_xy*(1 - d1)*(1 - d2);
-    C_d(4,5) = 0;
-    C_d(4,6) = 0;
-    C_d(5,1) = 0;
-    C_d(5,2) = 0;
-    C_d(5,3) = 0;
-    C_d(5,4) = 0;
-    C_d(5,5) = g_yz*(1 - d2)*(1 - d3);
-    C_d(5,6) = 0;
-    C_d(6,1) = 0;
-    C_d(6,2) = 0;
-    C_d(6,3) = 0;
-    C_d(6,4) = 0;
-    C_d(6,5) = 0;
-    C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
-    C_d
+    C_T_0 = M_inv*C;
     
     
 %%%%%%%%%  Second term of the tangent stiffness   %%%%%%%% 
@@ -369,7 +296,7 @@ else
 
 
       C_T_1_a = zeros(6,1);
-      C_T_1_a = [-sig6_eff(1); 0; 0; (d2 -1)*sig6_eff(4); 0; (d3 -1)*sig6_eff(6);]
+      C_T_1_a = [-sig6_eff(1); 0; 0; (d2 -1)*sig6_eff(4); 0; (d3 -1)*sig6_eff(6);];
 
       
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
@@ -386,7 +313,7 @@ else
         C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
        
       endif
-      C_T_1_b
+      
       C_T_1  =  C_T_1_a*C_T_1_b'
      
     endif

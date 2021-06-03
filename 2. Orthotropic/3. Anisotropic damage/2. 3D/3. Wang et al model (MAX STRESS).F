@@ -336,51 +336,7 @@ c********    Update stress
            sigma(i) = sigma_eff(i)       
         end do 
           
-c********      Degraded stiffness   **********      
-        dsdeEl_d(1,1)=(ONE-yz_zy)/(young_y*young_z*delta)*(ONE
-     &                -d1)**2
-        dsdeEl_d(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-     &              *(ONE - d1)*(ONE - d2)
-        dsdeEl_d(1,3) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d3)
-        dsdeEl_d(1,4) = 0
-        dsdeEl_d(1,5) = 0
-        dsdeEl_d(1,6) = 0
-        dsdeEl_d(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d2)
-        dsdeEl_d(2,2)=(ONE -zx_xz)/(young_x*young_z*delta)*(ONE - d2)**2
-        dsdeEl_d(2,3) = (pr_zy + pr_zx*pr_xy)/(young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE - d2)
-        dsdeEl_d(2,4) = 0
-        dsdeEl_d(2,5) = 0
-        dsdeEl_d(2,6) = 0
-        dsdeEl_d(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta)*
-     &              (ONE - d3)*(ONE - d1)
-        dsdeEl_d(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE- d2)
-        dsdeEl_d(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)*(ONE
-     &                -d3)**2
-        dsdeEl_d(3,4) = 0
-        dsdeEl_d(3,5) = 0
-        dsdeEl_d(3,6) = 0
-        dsdeEl_d(4,1) = 0
-        dsdeEl_d(4,2) = 0 
-        dsdeEl_d(4,3) = 0
-        dsdeEl_d(4,4) = g_xy*(ONE - d1)*(ONE - d2)
-        dsdeEl_d(4,5) = 0
-        dsdeEl_d(4,6) = 0
-        dsdeEl_d(5,1) = 0
-        dsdeEl_d(5,2) = 0 
-        dsdeEl_d(5,3) = 0
-        dsdeEl_d(5,4) = 0
-        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
-        dsdeEl_d(5,6) = 0
-        dsdeEl_d(6,1) = 0
-        dsdeEl_d(6,2) = 0 
-        dsdeEl_d(6,3) = 0
-        dsdeEl_d(6,4) = 0
-        dsdeEl_d(6,5) = 0
-        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2) 
+
       
       else
           
@@ -468,7 +424,7 @@ c*******   Find nominal stress from effective stress ********
            end do
         end do        
         
-        
+c********      Degraded stiffness   **********          
         do i=1,ncomp
            do j=1,ncomp
                do k=1,ncomp
@@ -478,52 +434,6 @@ c*******   Find nominal stress from effective stress ********
         end do
         
         
-c********      Degraded stiffness   **********      
-        dsdeEl_d(1,1)=(ONE-yz_zy)/(young_y*young_z*delta)*(ONE
-     &                -d1)**2
-        dsdeEl_d(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-     &              *(ONE - d1)*(ONE - d2)
-        dsdeEl_d(1,3) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d3)
-        dsdeEl_d(1,4) = 0
-        dsdeEl_d(1,5) = 0
-        dsdeEl_d(1,6) = 0
-        dsdeEl_d(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d2)
-        dsdeEl_d(2,2)=(ONE -zx_xz)/(young_x*young_z*delta)*(ONE - d2)**2
-        dsdeEl_d(2,3) = (pr_zy + pr_zx*pr_xy)/(young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE - d2)
-        dsdeEl_d(2,4) = 0
-        dsdeEl_d(2,5) = 0
-        dsdeEl_d(2,6) = 0
-        dsdeEl_d(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta)*
-     &              (ONE - d3)*(ONE - d1)
-        dsdeEl_d(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE- d2)
-        dsdeEl_d(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)*(ONE
-     &                -d3)**2
-        dsdeEl_d(3,4) = 0
-        dsdeEl_d(3,5) = 0
-        dsdeEl_d(3,6) = 0
-        dsdeEl_d(4,1) = 0
-        dsdeEl_d(4,2) = 0 
-        dsdeEl_d(4,3) = 0
-        dsdeEl_d(4,4) = g_xy*(ONE - d1)*(ONE - d2)
-        dsdeEl_d(4,5) = 0
-        dsdeEl_d(4,6) = 0
-        dsdeEl_d(5,1) = 0
-        dsdeEl_d(5,2) = 0 
-        dsdeEl_d(5,3) = 0
-        dsdeEl_d(5,4) = 0
-        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
-        dsdeEl_d(5,6) = 0
-        dsdeEl_d(6,1) = 0
-        dsdeEl_d(6,2) = 0 
-        dsdeEl_d(6,3) = 0
-        dsdeEl_d(6,4) = 0
-        dsdeEl_d(6,5) = 0
-        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2)
-         
         
         if ((d1 == ZERO).OR.(d1==ONE))   then
           

@@ -361,7 +361,8 @@ c*********     First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))
           d_C_d_d1(1,1) = -young_x/D**2
           d_C_d_d1(1,2) = ((d2 - ONE)*pr_xy*young_y)/(D**2)
           d_C_d_d1(2,1) = ((d2 - ONE)*pr_xy*young_y)/(D**2)
-          d_C_d_d1(2,2) = ((d2 - ONE)**2*pr_xy*pr_yx*young_y)/(D**2)            d_C_d_d1(3,3) =  g_xy*(1 - d2)
+          d_C_d_d1(2,2) = ((d2 - ONE)**2*pr_xy*pr_yx*young_y)/(D**2)  
+          d_C_d_d1(3,3) =  g_xy*(1 - d2)
           
           
 c********   (d_C_d/d1 : eps)   **********          

@@ -126,7 +126,7 @@ c
      &                  sigi (mcomp), C_T(mcomp,mcomp),
      &                  dsdeEl_d(mcomp,mcomp), T_strain(mcomp),
      &                  id(3,3), C_T_1(mcomp,mcomp),M_inv(mcomp,mcomp),
-     &                  C_T_1_a(mcomp), 
+     &                  C_T_1_a(mcomp), C_T_0(mcomp,mcomp),
      &                  C_T_1_b(mcomp), C_T_2(mcomp,mcomp), 
      &                  C_T_2_a(mcomp),
      &                  C_T_2_b(mcomp),sigma_eff(mcomp) 
@@ -147,7 +147,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,D
+     &                    F_m_new,F_z_new,D,V
 
       
       
@@ -155,7 +155,12 @@ c
      &                    var6, var7, var8
 	
 
- 
+      V    = ustatev(1) 
+      d1   = ustatev(2)
+      d2   = ustatev(3)
+      d3   = ONE - ((ONE - d1)*(ONE - d2))
+      F_f  = ustatev(4)
+      F_m  = ustatev(5)  
       
 c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	young_x  = prop(1)
@@ -170,15 +175,11 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_22_f_t = 50e6
       sig_22_f_c = -150e6
       sig_12_f   = 50e6
-
+      G_c_1      = 12.5e7
+      G_c_2      = 1e7
+      G_c_3      = 1e7
+      L_c        = V**(1/3)
       
-      d1   = ustatev(1)
-      d2   = ustatev(2)
-      d3   = ONE - ((ONE - d1)*(ONE - d2))
-      F_f  = ustatev(3)
-      F_m  = ustatev(4)
-    
-	
 
 
      
@@ -193,7 +194,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	dsdeEl(3,1) = ZERO
       dsdeEl(3,2) = ZERO
       dsdeEl(3,3) = g_xy
-
+      tsstif(1) = g_xy
 
   
       
@@ -257,8 +258,8 @@ c******    To make sure damage initiation criteria is greater than or equal to p
           
       
       call vzero(sigma,3)
-      call vzero(C_T_1_a, 6) 
-      call vzero(C_T_2_a, 6)
+      call vzero(C_T_1_a, 3) 
+      call vzero(C_T_2_a, 3)
       if ((F_f**2 <= 1) .AND. (F_m**2 <= 1)) then
  
 c********    Update stress
@@ -266,17 +267,6 @@ c********    Update stress
             sigma(i) = sigma_eff(i)       
          end do  
         
-c********      Degraded stiffness   **********      
-        D  =  ONE  -  ((ONE - d1)*(ONE - d2)*pr_xy*pr_yx)
-        dsdeEl_d(1,1) = young_x*(ONE - d1)*(ONE/D)
-        dsdeEl_d(1,2) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
-        dsdeEl_d(1,3) = ZERO
-        dsdeEl_d(2,1) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
-        dsdeEl_d(2,2) = young_y*(ONE - d2)*(ONE/D)
-        dsdeEl_d(2,3) = ZERO
-        dsdeEl_d(3,1) = ZERO
-        dsdeEl_d(3,2) = ZERO
-        dsdeEl_d(3,3) = g_xy*(ONE-d3)
       
       else
           
@@ -344,20 +334,17 @@ c*******   Find nominal stress from effective stress ********
            end do
         end do  
 
-c********      Degraded stiffness   **********      
-        D  =  ONE  -  ((ONE - d1)*(ONE - d2)*pr_xy*pr_yx)
-        dsdeEl_d(1,1) = young_x*(ONE - d1)*(ONE/D)
-        dsdeEl_d(1,2) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
-        dsdeEl_d(1,3) = ZERO
-        dsdeEl_d(2,1) = pr_xy * young_y *(ONE - d1)*(ONE - d2)*(ONE/D)
-        dsdeEl_d(2,2) = young_y*(ONE - d2)*(ONE/D)
-        dsdeEl_d(2,3) = ZERO
-        dsdeEl_d(3,1) = ZERO
-        dsdeEl_d(3,2) = ZERO
-        dsdeEl_d(3,3) = g_xy*(ONE-d3)
-         
+c*******   Degraded stiffness  ********
+        do i=1,ncomp
+           do j=1,ncomp
+               do k=1,ncomp
+                   C_T_0(i,j) = C_T_0(i,j) + (M_inv(i,k)*dsdeEl(k,j))
+               end do
+           end do
+        end do
         
-        if (d1 == 0) then
+        
+        if ((d1 == ZERO).OR.(d1==ONE)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -403,7 +390,7 @@ c**       For Compression
             
         
 
-        if (d2 == 0) then
+        if ((d2 == ZERO).OR.(d2==ONE)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -453,7 +440,7 @@ c**       For Compression
 c*********   Tangent stiffness  
         do i=1,ncomp
            do j=1,ncomp
-              C_T(i,j)   =  dsdeEl_d(i,j) +  C_T_1(i,j) + C_T_2(i,j) 
+              C_T(i,j)   =  C_T_0(i,j) +  C_T_1(i,j) + C_T_2(i,j) 
            end do
         end do
       
@@ -461,14 +448,15 @@ c*********   Tangent stiffness
       endif
       
 
-      ustatev(1) = d1
-      ustatev(2) = d2
-      ustatev(3) = F_f
-      ustatev(4) = F_m
+      ustatev(2) = d1
+      ustatev(3) = d2
+      ustatev(4) = F_f
+      ustatev(5) = F_m
+
 
       
  
-      
+      call vzero(stress,3)      
 c *** Update stress i
       do i=1,ncomp
          stress(i) = sigma(i)
@@ -480,7 +468,7 @@ c *** Update stress i
           
           do i=1,ncomp
               do j=1,ncomp
-                  dsdePl(i,j) = dsdeEl_d(i,j)        
+                  dsdePl(i,j) = dsdeEl(i,j)        
               end do
           end do 
       

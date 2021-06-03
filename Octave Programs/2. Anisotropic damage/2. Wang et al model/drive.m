@@ -29,7 +29,7 @@ addpath('analyt_sol/');
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=3;
+ltype=1;
 if ltype==1
     t=[0 10];
     lam=[0 0.2];

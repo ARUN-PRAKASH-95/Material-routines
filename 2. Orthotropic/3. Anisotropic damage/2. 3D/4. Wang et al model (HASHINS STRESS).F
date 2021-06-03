@@ -126,7 +126,7 @@ c
      &                  sigi (mcomp), C_T(mcomp,mcomp),
      &                  dsdeEl_d(mcomp,mcomp), T_strain(mcomp),
      &                  id(3,3), C_T_1(mcomp,mcomp),M_inv(mcomp,mcomp),
-     &                  C_T_1_a(mcomp), 
+     &                  C_T_1_a(mcomp),C_T_0(mcomp,mcomp), 
      &                  C_T_1_b(mcomp), C_T_2(mcomp,mcomp), 
      &                  C_T_2_a(mcomp),
      &                  C_T_2_b(mcomp),C_T_3(mcomp,mcomp), 
@@ -188,7 +188,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       G_c_1      = 12.5e7
       G_c_2      = 1e7
       G_c_3      = 1e7
-      L_c        = 1.25**(1/3)
+      L_c        = V**(1/3)
     
    
       
@@ -205,7 +205,8 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	
 	delta = (ONE - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz
 
-
+      tsstif(1) = g_xz
+      tsstif(2) = g_yz   
 	
 
 
@@ -340,52 +341,6 @@ c********    Update stress
         do i=1,ncomp
            sigma(i) = sigma_eff(i)       
         end do 
-          
-c********      Degraded stiffness   **********      
-        dsdeEl_d(1,1)=(ONE-yz_zy)/(young_y*young_z*delta)*(ONE
-     &                -d1)**2
-        dsdeEl_d(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-     &              *(ONE - d1)*(ONE - d2)
-        dsdeEl_d(1,3) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d3)
-        dsdeEl_d(1,4) = 0
-        dsdeEl_d(1,5) = 0
-        dsdeEl_d(1,6) = 0
-        dsdeEl_d(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d2)
-        dsdeEl_d(2,2)=(ONE -zx_xz)/(young_x*young_z*delta)*(ONE - d2)**2
-        dsdeEl_d(2,3) = (pr_zy + pr_zx*pr_xy)/(young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE - d2)
-        dsdeEl_d(2,4) = 0
-        dsdeEl_d(2,5) = 0
-        dsdeEl_d(2,6) = 0
-        dsdeEl_d(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta)*
-     &              (ONE - d3)*(ONE - d1)
-        dsdeEl_d(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE- d2)
-        dsdeEl_d(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)*(ONE
-     &                -d3)**2
-        dsdeEl_d(3,4) = 0
-        dsdeEl_d(3,5) = 0
-        dsdeEl_d(3,6) = 0
-        dsdeEl_d(4,1) = 0
-        dsdeEl_d(4,2) = 0 
-        dsdeEl_d(4,3) = 0
-        dsdeEl_d(4,4) = g_xy*(ONE - d1)*(ONE - d2)
-        dsdeEl_d(4,5) = 0
-        dsdeEl_d(4,6) = 0
-        dsdeEl_d(5,1) = 0
-        dsdeEl_d(5,2) = 0 
-        dsdeEl_d(5,3) = 0
-        dsdeEl_d(5,4) = 0
-        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
-        dsdeEl_d(5,6) = 0
-        dsdeEl_d(6,1) = 0
-        dsdeEl_d(6,2) = 0 
-        dsdeEl_d(6,3) = 0
-        dsdeEl_d(6,4) = 0
-        dsdeEl_d(6,5) = 0
-        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2) 
       
       else
           
@@ -471,54 +426,18 @@ c*******   Find nominal stress from effective stress ********
            do j=1,ncomp
                sigma(i) = sigma(i) + (M_inv(i,j)*sigma_eff(j))        
            end do
-        end do        
+        end do  
+        
+c********      Degraded stiffness   **********        
+        do i=1,ncomp
+           do j=1,ncomp
+               do k=1,ncomp
+                   C_T_0(i,j) = C_T_0(i,j) + (M_inv(i,k)*dsdeEl(k,j))
+               end do
+           end do
+        end do
 
-c********      Degraded stiffness   **********      
-        dsdeEl_d(1,1)=(ONE-yz_zy)/(young_y*young_z*delta)*(ONE
-     &                -d1)**2
-        dsdeEl_d(1,2) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)
-     &              *(ONE - d1)*(ONE - d2)
-        dsdeEl_d(1,3) = (pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d3)
-        dsdeEl_d(1,4) = 0
-        dsdeEl_d(1,5) = 0
-        dsdeEl_d(1,6) = 0
-        dsdeEl_d(2,1) = (pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta)*
-     &              (ONE - d1)*(ONE - d2)
-        dsdeEl_d(2,2)=(ONE -zx_xz)/(young_x*young_z*delta)*(ONE - d2)**2
-        dsdeEl_d(2,3) = (pr_zy + pr_zx*pr_xy)/(young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE - d2)
-        dsdeEl_d(2,4) = 0
-        dsdeEl_d(2,5) = 0
-        dsdeEl_d(2,6) = 0
-        dsdeEl_d(3,1) = (pr_zx + pr_yx*pr_zy) /(young_y*young_z*delta)*
-     &              (ONE - d3)*(ONE - d1)
-        dsdeEl_d(3,2) = (pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta)*
-     &              (ONE - d3)*(ONE- d2)
-        dsdeEl_d(3,3) = (ONE -xy_yx)/(young_x*young_y*delta)*(ONE
-     &                -d3)**2
-        dsdeEl_d(3,4) = 0
-        dsdeEl_d(3,5) = 0
-        dsdeEl_d(3,6) = 0
-        dsdeEl_d(4,1) = 0
-        dsdeEl_d(4,2) = 0 
-        dsdeEl_d(4,3) = 0
-        dsdeEl_d(4,4) = g_xy*(ONE - d1)*(ONE - d2)
-        dsdeEl_d(4,5) = 0
-        dsdeEl_d(4,6) = 0
-        dsdeEl_d(5,1) = 0
-        dsdeEl_d(5,2) = 0 
-        dsdeEl_d(5,3) = 0
-        dsdeEl_d(5,4) = 0
-        dsdeEl_d(5,5) = g_yz*(ONE - d1)*(ONE - d3)
-        dsdeEl_d(5,6) = 0
-        dsdeEl_d(6,1) = 0
-        dsdeEl_d(6,2) = 0 
-        dsdeEl_d(6,3) = 0
-        dsdeEl_d(6,4) = 0
-        dsdeEl_d(6,5) = 0
-        dsdeEl_d(6,6) = g_xz*(ONE - d3)*(ONE - d2)
-         
+ 
         
         if ((d1 == 0) .OR. (d1 == ONE)) then
           
@@ -686,7 +605,7 @@ c****     For Compression
 c*********   Tangent stiffness  
         do i=1,ncomp
            do j=1,ncomp
-              C_T(i,j)   =  dsdeEl_d(i,j) +  C_T_1(i,j) + C_T_2(i,j) +
+              C_T(i,j)   =  C_T_0(i,j) +  C_T_1(i,j) + C_T_2(i,j) +
      &        C_T_3(i,j) 
            end do
         end do
@@ -715,7 +634,7 @@ c *** Update stress i
           
           do i=1,ncomp
               do j=1,ncomp
-                  dsdePl(i,j) = dsdeEl_d(i,j)        
+                  dsdePl(i,j) = dsdeEl(i,j)        
               end do
           end do 
       

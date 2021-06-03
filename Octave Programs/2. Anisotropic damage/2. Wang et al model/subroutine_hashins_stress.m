@@ -194,44 +194,7 @@ sig6 = zeros(6,1);
 if F_f**2<=1 && F_m**2<=1 && F_z**2<=1
   
     sig6 = sig6_eff;
-    C_T = zeros(6,6);
-    C_T(1,1) = ((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1)**2;
-    C_T(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_T(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d1)*(1 - d3);
-    C_T(1,4) = 0;
-    C_T(1,5) = 0;
-    C_T(1,6) = 0;
-    C_T(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_T(2,2) = ((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2)**2;
-    C_T(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_T(2,4) = 0;
-    C_T(2,5) = 0;
-    C_T(2,6) = 0;
-    C_T(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d3)*(1 - d1);
-    C_T(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_T(3,3) = ((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3)**2;
-    C_T(3,4) = 0;
-    C_T(3,5) = 0;
-    C_T(3,6) = 0;
-    C_T(4,1) = 0;
-    C_T(4,2) = 0;
-    C_T(4,3) = 0;
-    C_T(4,4) = g_xy*(1 - d1)*(1 - d2);
-    C_T(4,5) = 0;
-    C_T(4,6) = 0;
-    C_T(5,1) = 0;
-    C_T(5,2) = 0;
-    C_T(5,3) = 0;
-    C_T(5,4) = 0;
-    C_T(5,5) = g_yz*(1 - d2)*(1 - d3);
-    C_T(5,6) = 0;
-    C_T(6,1) = 0;
-    C_T(6,2) = 0;
-    C_T(6,3) = 0;
-    C_T(6,4) = 0;
-    C_T(6,5) = 0;
-    C_T(6,6) = g_xz*(1 - d3)*(1 - d1);
-
+    C_T = C;
     
 else
     %fprintf('yes\n');
@@ -321,46 +284,9 @@ else
     
    
 %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%
-    C_d = zeros(6,6);
-    C_d(1,1) = ((1 -yz_zy) / (young_y*young_z*delta))*(1 - d1)**2;
-    C_d(1,2) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_d(1,3) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d1)*(1 - d3);
-    C_d(1,4) = 0;
-    C_d(1,5) = 0;
-    C_d(1,6) = 0;
-    C_d(2,1) = ((pr_yx + pr_zx*pr_yz) / (young_y*young_z*delta))*(1 - d1)*(1 - d2);
-    C_d(2,2) = ((1 -zx_xz) / (young_x*young_z*delta))*(1 - d2)**2;
-    C_d(2,3) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_d(2,4) = 0;
-    C_d(2,5) = 0;
-    C_d(2,6) = 0;
-    C_d(3,1) = ((pr_zx + pr_yx*pr_zy) / (young_y*young_z*delta))*(1 - d3)*(1 - d1);
-    C_d(3,2) = ((pr_zy + pr_zx*pr_xy) / (young_x*young_z*delta))*(1 - d3)*(1 - d2);
-    C_d(3,3) = ((1 -xy_yx) / (young_x*young_y*delta))*(1 - d3)**2;
-    C_d(3,4) = 0;
-    C_d(3,5) = 0;
-    C_d(3,6) = 0;
-    C_d(4,1) = 0;
-    C_d(4,2) = 0;
-    C_d(4,3) = 0;
-    C_d(4,4) = g_xy*(1 - d1)*(1 - d2);
-    C_d(4,5) = 0;
-    C_d(4,6) = 0;
-    C_d(5,1) = 0;
-    C_d(5,2) = 0;
-    C_d(5,3) = 0;
-    C_d(5,4) = 0;
-    C_d(5,5) = g_yz*(1 - d2)*(1 - d3);
-    C_d(5,6) = 0;
-    C_d(6,1) = 0;
-    C_d(6,2) = 0;
-    C_d(6,3) = 0;
-    C_d(6,4) = 0;
-    C_d(6,5) = 0;
-    C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
-    C_d;
+    C_T_0 = M_inv*C
     
-    if d1 == 0 | d1==0
+    if d1 == 0 | d1==1
       
       C_T_1 = zeros(6,6);   
       
@@ -375,7 +301,7 @@ else
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
       
       %%%%%%   For Tension   %%%%%%
-      if sig6_eff(1) > 0
+      if sig6_eff(1) >= 0
 
         C_T_1_b  = [ ((1 - k1*F_f)/(F_f**3 * sig_11_f_t**2 *(1-d1) ))*exp(k1*(F_f - 1))*sig6_eff(1)*C(1,1); ((1 - k1*F_f)/(F_f**3 * sig_11_f_t**2 *(1-d1) ))*exp(k1*(F_f - 1))*sig6_eff(1)*C(1,2); ((1 - k1*F_f)/(F_f**3 * sig_11_f_t**2 *(1-d1) ))*exp(k1*(F_f - 1))*sig6_eff(1)*C(1,3); ((1 - k1*F_f)/(F_f**3 * sig_12_f**2 *(1-d1)*(1 - d2) ))*exp(k1*(F_f - 1))*sig6_eff(4)*C(4,4); 0; ((1 - k1*F_f)/(F_f**3 * sig_13_f**2 *(1-d1)*(1 - d3) ))*exp(k1*(F_f - 1))*sig6_eff(6)*C(6,6); ];
         
@@ -393,7 +319,7 @@ else
     
     
 
-    if d2 == 0 | d2==0
+    if d2 == 0 | d2==1
       
       C_T_2  =  zeros(6,6);
      
@@ -427,7 +353,7 @@ else
     
     
     
-   if d3  == 0 | d3==0
+   if d3  == 0 | d3==1
      
      C_T_3  =  zeros(6,6);
    
@@ -462,7 +388,7 @@ else
     
     %%%%%%%%%  Tangent stiffness %%%%%%%%%
 
-    C_T  =  C_d + C_T_1 + C_T_2 + C_T_3;
+    C_T  =  C_T_0 + C_T_1 + C_T_2 + C_T_3;
     
    
   
