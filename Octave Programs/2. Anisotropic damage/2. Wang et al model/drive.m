@@ -29,10 +29,10 @@ addpath('analyt_sol/');
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=1;
+ltype=4;
 if ltype==1
     t=[0 10];
-    lam=[0 0.2];
+    lam=[0 0.1];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -41,10 +41,10 @@ elseif ltype==3
     lam=[0 0.1 0.0000];
 elseif ltype==4
     t=[0 2.5 7.5 10];
-    lam=[0 n_ampl*sigma_y0/2/mu/(1-q_el) -n_ampl*sigma_y0/2/mu/(1-q_el)];
+    lam=[0 0.08 -0.1];
 elseif ltype==5
     t=[0 2.5 7.5 12.5 17.5 22.5 25.0];
-    lam=[0 0.005 -0.005];
+    lam=[0 0.1 -0.1];
 end
 
 %--------------------------------------------------------------------------
@@ -154,9 +154,9 @@ figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
 plot(e11,s11,'or-')
-legend('G_c_1 = 12.5e7 N/m','Ref.','Location','NorthEast')
+#legend('G_c_1 = 12.5e7 N/m','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
-ylabel('\sigma_{11}')
+ylabel('\sigma_{11} (N/m^2)')
  
 
  
@@ -173,7 +173,7 @@ ylabel('\epsilon_{22},\epsilon_{33}')
 % plot damage
 figure(4)
 plot(e11,sdv(1,:),'or-')
-legend('G_c_1 = 12.5e7 N/m','Ref.','Location','East')
+#legend('G_c_1 = 12.5e7 N/m','Ref.','Location','East')
 xlabel('\epsilon_{11}')
 ylabel('d1')
 

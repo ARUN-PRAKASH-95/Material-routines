@@ -1,4 +1,4 @@
-function [sig6,A66,sdvl]=subroutine_max_stress(eps6,sdvl,ttype)
+function [sig6,A66,sdvl]=subroutine_cervera(eps6,sdvl,ttype)
 
 
 
@@ -45,7 +45,7 @@ delta = (1 - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz;
 
 % restore the strain tensor in voigt notation
 eps = [eps6(1); eps6(2); eps6(3); eps6(4); eps6(5); eps6(6);];
-eps(1)
+eps;
 % restore the strain tensor
 eps_tensor = [eps6(1) eps6(4)/2 eps6(6)/2;
               eps6(4)/2 eps6(2) eps6(5)/2;
@@ -101,7 +101,7 @@ C(6,3) = 0;
 C(6,4) = 0;
 C(6,5) = 0;
 C(6,6) = g_xz;
-C;
+C
 
 eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_11_f_c = sig_11_f_c / ((1 -yz_zy) / (young_y*young_z*delta));
@@ -129,11 +129,12 @@ sig6_eff;
 
 if sig6_eff(1) >= 0
   
+ 
   F_f_new   =  sig6_eff(1)/sig_11_f_t;
 
 elseif sig6_eff(1) < 0
-  sig6_eff(1)
-  F_f_new   =  sig6_eff(1)/sig_11_f_c
+
+  F_f_new   =  sig6_eff(1)/sig_11_f_c;
   
 endif
 
@@ -142,11 +143,11 @@ endif
 
 if sig6_eff(2) >= 0 
   
-  F_m_new  =  sig6_eff(2)/sig_22_f_t; 
+  F_m_new   =  sig6_eff(2)/sig_22_f_t; 
  
 elseif sig6_eff(2) < 0
  
-  F_m_new   =  sig6_eff(2)/sig_22_f_c;
+  F_m_new   =  sig6_eff(2)/sig_22_f_c
 
 endif
 
@@ -161,6 +162,7 @@ elseif sig6_eff(3) < 0
   F_z_new  =  sig6_eff(3)/sig_33_f_c;
   
 endif
+
 
 %%%%%%%% To make sure damage initiation criteria is greater than or equal to previous step  %%%%%%%%%%
 
@@ -182,13 +184,12 @@ else
     F_z = F_z;
 end
 
-F_f
 
 
 sig6 = zeros(6,1);
 %%%%%%%%  Check whether damage has initiated or not  %%%%%%%%%
 if F_f<=1 && F_m<=1 && F_z<=1
-    
+  
     sig6 = sig6_eff;
     C_T = C;
 
@@ -198,23 +199,30 @@ else
 
 %%%%%%  Terms in damage evolution equations  %%%%%%%%
     if sig6_eff(1) >= 0
-      k1 = (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1;    
+      Hs = sig_11_f_t**2/(2*young_x*G_c_1);
+      k1 =  Hs*L_c/(1 - Hs*L_c)  
+      Hs*L_c
     elseif sig6_eff(1) < 0   
-      k1 = (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1;      
+      Hs = sig_11_f_c**2/(2*young_x*G_c_1);
+      k1 =  Hs*L_c/(1 - Hs*L_c)      
     endif
         
     
     if sig6_eff(2) >= 0  
-      k2 = (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2;       
+      Hs = sig_22_f_t**2/(2*young_y*G_c_2);
+      k2 =  Hs*L_c/(1 - Hs*L_c)    
     elseif sig6_eff(2) < 0  
-      k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2;     
+      Hs = sig_22_f_c**2/(2*young_y*G_c_2);
+      k2 =  Hs*L_c/(1 - Hs*L_c)         
     endif
     
     
     if sig6_eff(3) >= 0
-      k3 =  (-sig_33_f_t*eps_33_f_t*L_c)/G_c_3;      
+      Hs = sig_33_f_t**2/(2*young_z*G_c_3);
+      k3 =  Hs*L_c/(1 - Hs*L_c)     
     elseif sig6_eff(3) < 0
-      k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3;      
+      Hs = sig_33_f_c**2/(2*young_z*G_c_3);
+      k3 =  Hs*L_c/(1 - Hs*L_c)   
     endif   
 
    
@@ -415,7 +423,7 @@ elseif ttype == 1
         %recursiv call of your material routine with ttype=0 to avoid
         %endless loop
         %Calculate perturbed stress, sdv are not overwritten
-        [sig6per,Adummy,sdvldummy] = subroutine_max_stress(epsper,sdvl,0);
+        [sig6per,Adummy,sdvldummy] = subroutine_cervera(epsper,sdvl,0);
         %Simple differential quotient
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         
