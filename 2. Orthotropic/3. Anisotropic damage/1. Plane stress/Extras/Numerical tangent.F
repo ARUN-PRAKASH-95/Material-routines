@@ -175,10 +175,10 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_22_f_t = 500e6
       sig_22_f_c = -1500e6
       sig_12_f   = 50e6
-      G_c_1      = 12.5e6
-      G_c_2      = 1e6
-      G_c_3      = 1e6
-      L_c        = 1
+      G_c_1      = 12.5e7
+      G_c_2      = 1e7
+      G_c_3      = 1e7
+      L_c        = V**(1.0/3.0)
 	eta        =  0
       dmax = 1
       multiplier = 1e-3
@@ -286,7 +286,7 @@ c*********  Terms in damage evolution equations   ***********
 c*********   Damage evolution equations    *********** 	  
         if (F_f > ONE) then
       
-          d1_new = ONE  - (exp(k1*(F_f - ONE)))/F_f 
+          d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f 
       
           if (d1_new > d1) then
               d1 = d1_new
@@ -299,7 +299,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_m > ONE) then
       
-          d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m 
+          d2_new = ZERO
       
           if (d2_new > d2) then
               d2 = d2_new
@@ -323,7 +323,11 @@ c*****      Inverse of the damage effect tensor  ********
         M_inv(2,2)  = (ONE - d2)
         M_inv(3,3)  = (ONE - d3)
 
-
+        do i=1,ncomp
+           do j=1,ncomp
+               sigma(i) = sigma(i) + (M_inv(i,j)*sigma_eff(j))        
+           end do
+        end do 
 
 c*******   Degraded stiffness  ********
         do i=1,ncomp
@@ -344,12 +348,7 @@ c*******   Degraded stiffness  ********
         dsdeEl_d(3,2) = ZERO
         dsdeEl_d(3,3) = g_xy*(ONE+eta-d3)
 
-c********    Compute stress              
-        do i=1,ncomp
-          do j=1,ncomp
-              sigma(i) = sigma(i) + (dsdeEl_d(i,j)*T_strain(j))        
-          end do
-        end do 
+
         
        
         if (d1 == ZERO) then
@@ -493,7 +492,7 @@ c *** Update stress i
           else
           
               do i = 1,ncomp
-                  hper = 1e-15
+                  hper = 1e-12
                   dStrain(i) = dStrain(i) + hper
                   ttype = 0
                   call usermatps (

@@ -32,7 +32,6 @@
       EXTERNAL         myuserfunc
       integer :: myvar
 	
-      
 	
 	
       double precision :: var0, var1, var2, var3, var4, var5,
@@ -65,7 +64,7 @@ c
      &                   var0, defGrad_t, defGrad,
      &                   tsstif, epsZZ,
      &                   var1, var2, var3, var4, var5,
-     &                   var6, var7, var8, ttype)
+     &                   var6, var7, var8,ttype)
 
 
       end if
@@ -84,7 +83,7 @@ c
      &                   var0, defGrad_t, defGrad,
      &                   tsstif, epsZZ,
      &                   var1, var2, var3, var4, var5,
-     &                   var6, var7, var8, ttype)
+     &                   var6, var7, var8,ttype)
 	
 	
 #include "impcom.inc"
@@ -124,11 +123,11 @@ c
       EXTERNAL          vzero, vmove
    
       double precision  dsdeEl(ncomp,ncomp), sigma(ncomp),
-     &                  C_T(ncomp,ncomp), C_T_num(ncomp,ncomp),
+     &                  C_T_num(ncomp,ncomp),  C_T(ncomp,ncomp),
      &                  dsdeEl_d(ncomp,ncomp), T_strain(ncomp),
      &                  id(3,3), C_T_1(ncomp,ncomp),M_inv(ncomp,ncomp),
      &                  C_T_1_a(ncomp),sigma_eff(ncomp),
-     &                  C_T_1_b(ncomp), C_T_2(ncomp,ncomp), 
+     &                  C_T_1_b(ncomp), C_T_2(ncomp,ncomp),
      &                  C_T_2_a(ncomp),C_T_2_b(ncomp),C_T_0(ncomp,ncomp) 
                   
 
@@ -144,9 +143,9 @@ c
       
       double precision    d3_new,F_f,F_m,F_z,term1,term2,g_xy, g_yz, 
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
-     &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
+     &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,dmax,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,D,V,eta,hper,dmax,multiplier
+     &                    F_m_new,F_z_new,D,V,eta,Hs,hper,multiplier
 
       
       
@@ -175,13 +174,14 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_22_f_t = 500e6
       sig_22_f_c = -1500e6
       sig_12_f   = 50e6
-      G_c_1      = 12.5e6
-      G_c_2      = 1e6
-      G_c_3      = 1e6
-      L_c        = 1
+      G_c_1      = 12.5e7
+      G_c_2      = 1e7
+      G_c_3      = 1e7
+      L_c        = V**(1.0/3.0)
 	eta        =  0
       dmax = 1
       multiplier = 1e-3
+
      
 ********* ELASTIC STIFFNESS MATRIX *********
 	
@@ -268,16 +268,20 @@ c********    Update stress
           
 c*********  Terms in damage evolution equations   ***********
         if (sigma_eff(1) >= 0) then
-          k1 =   (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1
-        else 
-          k1 =   (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1
+          Hs = sig_11_f_t**2/(2*young_x*G_c_1)
+          k1 = Hs*L_c/(1 - Hs*L_c)
+        else
+          Hs = sig_11_f_c**2/(2*young_x*G_c_1) 
+          k1 = Hs*L_c/(1 - Hs*L_c)
         endif
         
         
         if (sigma_eff(2)  >= 0) then
-          k2 =  (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2
-        else 
-          k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2
+          Hs = sig_22_f_t**2/(2*young_y*G_c_2)
+          k2 = Hs*L_c/(1 - Hs*L_c)
+        else
+          Hs = sig_22_f_c**2/(2*young_y*G_c_2)  
+          k2 = Hs*L_c/(1 - Hs*L_c)
         endif
       
         
@@ -286,26 +290,27 @@ c*********  Terms in damage evolution equations   ***********
 c*********   Damage evolution equations    *********** 	  
         if (F_f > ONE) then
       
-          d1_new = ONE  - (exp(k1*(F_f - ONE)))/F_f 
+          d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f 
       
           if (d1_new > d1) then
               d1 = d1_new
           else
               d1 = d1
           endif
-          
+
         endif        
 
       
         if (F_m > ONE) then
       
-          d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m 
+          d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m
       
           if (d2_new > d2) then
               d2 = d2_new
           else
               d2 = d2
           endif
+
         
         endif
       
@@ -322,9 +327,14 @@ c*****      Inverse of the damage effect tensor  ********
         M_inv(1,1)  = (ONE - d1)
         M_inv(2,2)  = (ONE - d2)
         M_inv(3,3)  = (ONE - d3)
-
-
-
+      
+c*******   Find nominal stress from effective stress ********
+        do i=1,ncomp
+           do j=1,ncomp
+               sigma(i) = sigma(i) + (M_inv(i,j)*sigma_eff(j))        
+           end do
+        end do 
+        
 c*******   Degraded stiffness  ********
         do i=1,ncomp
            do j=1,ncomp
@@ -344,15 +354,8 @@ c*******   Degraded stiffness  ********
         dsdeEl_d(3,2) = ZERO
         dsdeEl_d(3,3) = g_xy*(ONE+eta-d3)
 
-c********    Compute stress              
-        do i=1,ncomp
-          do j=1,ncomp
-              sigma(i) = sigma(i) + (dsdeEl_d(i,j)*T_strain(j))        
-          end do
-        end do 
-        
        
-        if (d1 == ZERO) then
+        if ((d1 == ZERO).OR.(d1 == ONE)) then
           
           do i=1,ncomp
              do j=1,ncomp
@@ -394,7 +397,7 @@ c**       For Compression
             
         
 
-        if (d2 == ZERO) then
+        if ((d2 == ZERO).OR.(d2 == ONE)) then
           
           do i=1,ncomp
              do j=1,ncomp
@@ -434,7 +437,7 @@ c**       For Compression
               
         endif   
         
-************   Algorithmic tangent   ************
+
          do i=1,ncomp
             do j=1,ncomp
                C_T(i,j) = dsdeEl_d(i,j) + C_T_1(i,j) + C_T_2(i,j)
@@ -493,7 +496,7 @@ c *** Update stress i
           else
           
               do i = 1,ncomp
-                  hper = 1e-15
+                  hper = 1e-10
                   dStrain(i) = dStrain(i) + hper
                   ttype = 0
                   call usermatps (
@@ -534,8 +537,7 @@ c *** Update stress i
           endif
           
       endif
-                  
-                  
+      
       
       return
       end
