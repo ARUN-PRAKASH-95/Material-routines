@@ -372,23 +372,18 @@ c*******   Degraded stiffness  ********
 c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   ***********
  
 c**       For Tension          
-          if (sigma_eff(1)>= 0)  then
+          if (sigma_eff(1)> 0)  then
           
-            C_T_1_b  = (/ ((ONE-k1*F_f)/(F_f**3* sig_11_f_t**2 ))
-     &     *exp(k1*(F_f - ONE))*sigma_eff(1)*dsdeEl(1,1), ((ONE-k1*F_f)
-     &     /(F_f**3* sig_11_f_t**2 ))*exp(k1*(F_f - ONE))*
-     &     sigma_eff(1)*dsdeEl(1,2),
-     &     ((ONE-k1*F_f)/(F_f**3* sig_12_f**2))
-     &     *exp(k1*(F_f - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/)            
+            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_t))
+     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
+     &     * sig_11_f_t))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
+            
 c**       For Compression           
           else
               
-            C_T_1_b  = (/ ((ONE-k1*F_f)/(F_f**3* sig_11_f_c**2 ))
-     &     *exp(k1*(F_f - ONE))*sigma_eff(1)*dsdeEl(1,1), ((ONE-k1*F_f)
-     &     /(F_f**3* sig_11_f_c**2 ))*exp(k1*(F_f - ONE))*
-     &     sigma_eff(1)*dsdeEl(1,2),
-     &     ((ONE-k1*F_f)/(F_f**3* sig_12_f**2 ))
-     &     *exp(k1*(F_f - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/)  
+            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_c))
+     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
+     &     * sig_11_f_c))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
             
           endif
       
@@ -418,24 +413,18 @@ c**       For Compression
 c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
       
 c****      For Tension           
-          if (sigma_eff(2)>= 0)  then
+          if (sigma_eff(2)> 0)  then
           
-            C_T_2_b= (/ ((ONE-k2*F_m)/(F_m**3 * sig_22_f_t**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(2)*dsdeEl(2,1),  
-     &     ((ONE-k2*F_m)/(F_m**3 * sig_22_f_t**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(2)*dsdeEl(2,2), 
-     &     ((ONE-k2*F_m)/(F_m**3 * sig_12_f**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/) 
-            
+            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_t))
+     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
+     &     *sig_22_f_t))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/)
+     
 c**       For Compression                       
           else                                         
               
-            C_T_2_b= (/ ((ONE-k2*F_m)/(F_m**3 * sig_22_f_c**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(2)*dsdeEl(2,1),  
-     &     ((ONE-k2*F_m)/(F_m**3 * sig_22_f_c**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(2)*dsdeEl(2,2), 
-     &     ((ONE-k2*F_m)/(F_m**3 * sig_12_f**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/) 
+            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_c))
+     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
+     &     *sig_22_f_c))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/) 
               
           endif
 
@@ -456,7 +445,6 @@ c*********   Tangent stiffness
            end do
         end do
 
-        
         open(10,file='data.txt')
         write(10,*)  ldstep
         write(10,*)  isubst
@@ -472,7 +460,7 @@ c*********   Tangent stiffness
       ustatev(3) = d2
       ustatev(4) = F_f
       ustatev(5) = F_m
-      ustatev(6) = d3
+
 
       
  

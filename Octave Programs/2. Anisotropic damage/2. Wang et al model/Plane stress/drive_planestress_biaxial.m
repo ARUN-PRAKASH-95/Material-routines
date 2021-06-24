@@ -68,7 +68,7 @@ s22=zeros(1,steps); eps12=zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-7;
 maxit=100;
-ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');

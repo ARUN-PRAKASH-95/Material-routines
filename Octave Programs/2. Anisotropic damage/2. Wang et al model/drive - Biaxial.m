@@ -28,7 +28,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.2];
+    lam=[0 0.1];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
@@ -69,7 +69,7 @@ eps33=zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-4;
 maxit=100;
-ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -133,7 +133,7 @@ close(wb)
 %fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
-
+#{
 data = [time; e11; s11; e22; s22; eps33];
 
 fileID = fopen('output_Biaxial.txt','w');

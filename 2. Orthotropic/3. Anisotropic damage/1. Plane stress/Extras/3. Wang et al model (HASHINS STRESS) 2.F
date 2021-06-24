@@ -147,7 +147,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,D,V,alpha
+     &                    F_m_new,F_z_new,D,V
 
       
       
@@ -158,7 +158,7 @@ c
       V    = ustatev(1) 
       d1   = ustatev(2)
       d2   = ustatev(3)
-      d3   = ustatev(6)
+      d3   = ONE - ((ONE - d1)*(ONE - d2))
       F_f  = ustatev(4)
       F_m  = ustatev(5)  
       
@@ -173,13 +173,13 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
       sig_22_f_t = 500e6
-      sig_22_f_c = -1000e6
+      sig_22_f_c = -1500e6
       sig_12_f   = 50e6
       G_c_1      = 12.5e6
       G_c_2      = 1e6
       G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
-      alpha = ZERO
+      
 
 
      
@@ -218,24 +218,20 @@ c**** Compute current stress
           end do
       end do          
       
-     
-c****Modified Hashin's Damage initiation criteria
+      
+c****Damage initiation criteria
  
       if (sigma_eff(1) >= 0) then                    
-          F_f_new = sqrt( (sigma_eff(1)/sig_11_f_t)**2 +       
-     & alpha*(sigma_eff(3)/sig_12_f)**2)
+          F_f_new = sigma_eff(1)/sig_11_f_t          
       else           
-          F_f_new = sqrt( (sigma_eff(1)/sig_11_f_c)**2 +       
-     & alpha*(sigma_eff(3)/sig_12_f)**2)
+          F_f_new = sigma_eff(1)/sig_11_f_c  
       endif
             
       
       if (sigma_eff(2)>= 0)  then         
-          F_m_new = sqrt( (sigma_eff(2)/sig_22_f_t)**2 + 
-     & alpha*(sigma_eff(3)/sig_12_f)**2)
+          F_m_new = sigma_eff(2)/sig_22_f_t     
       else          
-          F_m_new = sqrt( (sigma_eff(2)/sig_22_f_c)**2 + 
-     & alpha*(sigma_eff(3)/sig_12_f)**2)               
+          F_m_new = sigma_eff(2)/sig_22_f_c                
       endif
       
       
@@ -260,7 +256,7 @@ c******    To make sure damage initiation criteria is greater than or equal to p
       call vzero(sigma,3)
       call vzero(C_T_1_a, 3) 
       call vzero(C_T_2_a, 3)
-      if ((F_f <= 1) .AND. (F_m <= 1)) then
+      if ((F_f**2 <= 1) .AND. (F_m**2 <= 1)) then
  
 c********    Update stress
          do i=1,ncomp
@@ -288,7 +284,7 @@ c*********  Terms in damage evolution equations   ***********
        
 
 c*********   Damage evolution equations    *********** 	  
-        if (F_f > 1) then
+        if (F_f**2 > 1) then
       
           d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f
       
@@ -301,7 +297,7 @@ c*********   Damage evolution equations    ***********
         endif        
 
       
-        if (F_m > 1) then
+        if (F_m**2 > 1) then
       
           d2_new =  ONE  - (exp(k2*(F_m - ONE)))/F_m
       
@@ -313,7 +309,7 @@ c*********   Damage evolution equations    ***********
         
         endif
       
-        d3  = ONE - ((ONE - d1)*(ONE - d2))
+        d3  = 1 - ((1 -d1)*(1 - d2))
 
 c*****      Inverse of the damage effect tensor  ********
         
@@ -323,9 +319,9 @@ c*****      Inverse of the damage effect tensor  ********
             end do
         end do
         
-        M_inv(1,1)  = (ONE - d1)
-        M_inv(2,2)  = (ONE - d2)
-        M_inv(3,3)  = (ONE - d3)
+        M_inv(1,1)  = (1 - d1)
+        M_inv(2,2)  = (1 - d2)
+        M_inv(3,3)  = (1 - d3)
       
 c*******   Find nominal stress from effective stress ********
         do i=1,ncomp
@@ -378,8 +374,8 @@ c**       For Tension
      &     *exp(k1*(F_f - ONE))*sigma_eff(1)*dsdeEl(1,1), ((ONE-k1*F_f)
      &     /(F_f**3* sig_11_f_t**2 ))*exp(k1*(F_f - ONE))*
      &     sigma_eff(1)*dsdeEl(1,2),
-     &     ((ONE-k1*F_f)/(F_f**3* sig_12_f**2))
-     &     *exp(k1*(F_f - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/)            
+     &     ((ONE-k1*F_f)/(F_f**3* sig_12_f**2 ))
+     &     *exp(k1*(F_f - ONE))*sigma_eff(3)*dsdeEl(3,3) /)            
 c**       For Compression           
           else
               
@@ -388,7 +384,7 @@ c**       For Compression
      &     /(F_f**3* sig_11_f_c**2 ))*exp(k1*(F_f - ONE))*
      &     sigma_eff(1)*dsdeEl(1,2),
      &     ((ONE-k1*F_f)/(F_f**3* sig_12_f**2 ))
-     &     *exp(k1*(F_f - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/)  
+     &     *exp(k1*(F_f - ONE))*sigma_eff(3)*dsdeEl(3,3)/)  
             
           endif
       
@@ -425,7 +421,7 @@ c****      For Tension
      &     ((ONE-k2*F_m)/(F_m**3 * sig_22_f_t**2))
      &     *exp(k2*(F_m - ONE))*sigma_eff(2)*dsdeEl(2,2), 
      &     ((ONE-k2*F_m)/(F_m**3 * sig_12_f**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/) 
+     &     *exp(k2*(F_m - ONE))*sigma_eff(3)*dsdeEl(3,3)/) 
             
 c**       For Compression                       
           else                                         
@@ -435,7 +431,7 @@ c**       For Compression
      &     ((ONE-k2*F_m)/(F_m**3 * sig_22_f_c**2))
      &     *exp(k2*(F_m - ONE))*sigma_eff(2)*dsdeEl(2,2), 
      &     ((ONE-k2*F_m)/(F_m**3 * sig_12_f**2))
-     &     *exp(k2*(F_m - ONE))*sigma_eff(3)*dsdeEl(3,3)*ZERO/) 
+     &     *exp(k2*(F_m - ONE))*sigma_eff(3)*dsdeEl(3,3)/) 
               
           endif
 
@@ -455,7 +451,6 @@ c*********   Tangent stiffness
               C_T(i,j)   = dsdeEl_d(i,j)  +  C_T_1(i,j) + C_T_2(i,j) 
            end do
         end do
-
         
         open(10,file='data.txt')
         write(10,*)  ldstep
@@ -472,7 +467,7 @@ c*********   Tangent stiffness
       ustatev(3) = d2
       ustatev(4) = F_f
       ustatev(5) = F_m
-      ustatev(6) = d3
+
 
       
  
@@ -484,7 +479,7 @@ c *** Update stress i
       
 
       
-      if ((F_f <= 1) .AND. (F_m <= 1)) then
+      if ((F_f**2 <= 1) .AND. (F_m**2 <= 1)) then
           
           do i=1,ncomp
               do j=1,ncomp

@@ -316,7 +316,7 @@ else
     C_d(6,4) = 0;
     C_d(6,5) = 0;
     C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
-    C_d;
+    C_d
     
     if d1 == 0  | d1==1
       
@@ -522,8 +522,8 @@ elseif ttype == 1
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         
     end
-    A66=A66_num;
-    A66
+    A66=A66_num
+    
 end
 
 

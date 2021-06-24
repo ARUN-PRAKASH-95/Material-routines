@@ -45,7 +45,7 @@ delta = (1 - (xy_yx) - (yz_zy) - (zx_xz) - (xyz)) / E_xyz;
 
 % restore the strain tensor in voigt notation
 eps = [eps6(1); eps6(2); eps6(3); eps6(4); eps6(5); eps6(6);];
-eps(1)
+
 % restore the strain tensor
 eps_tensor = [eps6(1) eps6(4)/2 eps6(6)/2;
               eps6(4)/2 eps6(2) eps6(5)/2;
@@ -132,8 +132,8 @@ if sig6_eff(1) >= 0
   F_f_new   =  sig6_eff(1)/sig_11_f_t;
 
 elseif sig6_eff(1) < 0
-  sig6_eff(1)
-  F_f_new   =  sig6_eff(1)/sig_11_f_c
+  
+  F_f_new   =  sig6_eff(1)/sig_11_f_c;
   
 endif
 
@@ -182,7 +182,7 @@ else
     F_z = F_z;
 end
 
-F_f
+
 
 
 sig6 = zeros(6,1);
@@ -297,7 +297,7 @@ else
 
 
       C_T_1_a = zeros(6,1);
-      C_T_1_a = [-sig6_eff(1); 0; 0; (d2 -1)*sig6_eff(4); 0; (d3 -1)*sig6_eff(6);];
+      C_T_1_a = [-sig6_eff(1); 0; 0; (0.5*(d2 -1)*sig6_eff(4))/M_inv(4,4); 0; (0.5*(d3 -1)*sig6_eff(6))/M_inv(6,6);];
 
       
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
@@ -305,16 +305,16 @@ else
       %%%%%%   For Tension   %%%%%%
       if sig6_eff(1) >= 0
 
-        C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_t * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_t * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_t * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
+        C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_t ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_t  ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_t  ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
         
         
       %%%%%   For Compression  %%%%%%
       elseif sig6_eff(1) < 0
 
-        C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c * (1 - d1) ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
+        C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_c  ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c  ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c  ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
        
       endif
-      
+      C_T_1_b;
       C_T_1  =  C_T_1_a*C_T_1_b';
      
     endif
@@ -331,7 +331,7 @@ else
       %%%%%%%%% Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))   %%%%%%%%%%
 
       C_T_2_a = zeros(6,1);
-      C_T_2_a = [ 0; -sig6_eff(2); 0; (d1 -1)*sig6_eff(4); (d3 -1)*sig6_eff(5); 0; ];
+      C_T_2_a = [ 0; -sig6_eff(2); 0; (0.5*(d1 -1)*sig6_eff(4))/M_inv(4,4); (0.5*(d3 -1)*sig6_eff(5))/M_inv(5,5) ; 0; ];
 
     %%%%%%%%%%%%%%%%   Derivative of d2 with respect to strain (d_d2/d_epsilon)  %%%%%%%%%%%%%
 
@@ -339,13 +339,13 @@ else
       if sig6_eff(2)  >= 0
       
         
-        C_T_2_b  = [((1 - k2*F_m)/(F_m**2 * sig_22_f_t * (1 - d2) ))*exp(k2*(F_m - 1))*C(2,1); ((1 - k2*F_m)/(F_m**2 * sig_22_f_t * (1 - d2) ))*exp(k2*(F_m - 1))*C(2,2); ((1 - k2*F_m)/(F_m**2 * sig_22_f_t * (1 - d2) ))*exp(k2*(F_m - 1))*C(2,3); 0; 0; 0;];
+        C_T_2_b  = [((1 - k2*F_m)/(F_m**2 * sig_22_f_t  ))*exp(k2*(F_m - 1))*C(2,1); ((1 - k2*F_m)/(F_m**2 * sig_22_f_t  ))*exp(k2*(F_m - 1))*C(2,2); ((1 - k2*F_m)/(F_m**2 * sig_22_f_t  ))*exp(k2*(F_m - 1))*C(2,3); 0; 0; 0;];
         
 
       %%%%%   For Compression  %%%%%%  
       elseif sig6_eff(2) < 0
         
-        C_T_2_b  = [((1 - k2*F_m)/(F_m**2 * sig_22_f_c * (1 - d2) ))*exp(k2*(F_m - 1))*C(2,1); ((1 - k2*F_m)/(F_m**2 * sig_22_f_c * (1 - d2) ))*exp(k2*(F_m - 1))*C(2,2); ((1 - k2*F_m)/(F_m**2 * sig_22_f_c * (1 - d2) ))*exp(k2*(F_m - 1))*C(2,3); 0; 0; 0;];
+        C_T_2_b  = [((1 - k2*F_m)/(F_m**2 * sig_22_f_c  ))*exp(k2*(F_m - 1))*C(2,1); ((1 - k2*F_m)/(F_m**2 * sig_22_f_c  ))*exp(k2*(F_m - 1))*C(2,2); ((1 - k2*F_m)/(F_m**2 * sig_22_f_c  ))*exp(k2*(F_m - 1))*C(2,3); 0; 0; 0;];
           
       endif
 
@@ -365,19 +365,19 @@ else
       %%%%%%%%% Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon))  %%%%%%%%%%
       
       C_T_3_a = zeros(6,1);
-      C_T_3_a = [ 0; 0; -sig6_eff(3);  0;  (d2 -1)*sig6_eff(5); (d1 -1)*sig6_eff(6);  ];
+      C_T_3_a = [ 0; 0; -sig6_eff(3);  0;  (0.5*(d2 -1)*sig6_eff(5))/M_inv(5,5); (0.5*(d1 -1)*sig6_eff(6))/M_inv(6,6);  ];
 
     %%%%%%%%%%%%%%%%   Derivative of d3 with respect to strain (d_d3/d_epsilon)  %%%%%%%%%%%%%
      
       %%%%%%   For Tension   %%%%%%       
       if sig6_eff(3) >= 0 
         
-        C_T_3_b  = [((1 - k3*F_z)/(F_z**2 * sig_33_f_t * (1 - d3) ))*exp(k3*(F_z - 1))*C(3,1); ((1 - k3*F_z)/(F_z**2 * sig_33_f_t * (1 - d3) ))*exp(k3*(F_z - 1))*C(3,2); ((1 - k3*F_z)/(F_z**2 * sig_33_f_t * (1 - d3) ))*exp(k3*(F_z - 1))*C(3,3); 0; 0; 0;];
+        C_T_3_b  = [((1 - k3*F_z)/(F_z**2 * sig_33_f_t  ))*exp(k3*(F_z - 1))*C(3,1); ((1 - k3*F_z)/(F_z**2 * sig_33_f_t ))*exp(k3*(F_z - 1))*C(3,2); ((1 - k3*F_z)/(F_z**2 * sig_33_f_t  ))*exp(k3*(F_z - 1))*C(3,3); 0; 0; 0;];
         
       %%%%%   For Compression  %%%%%%
       elseif sig6_eff(3) < 0
         
-        C_T_3_b  = [((1 - k3*F_z)/(F_z**2 * sig_33_f_c * (1 - d3) ))*exp(k3*(F_z - 1))*C(3,1); ((1 - k3*F_z)/(F_z**2 * sig_33_f_c * (1 - d3) ))*exp(k3*(F_z - 1))*C(3,2); ((1 - k3*F_z)/(F_z**2 * sig_33_f_c * (1 - d3) ))*exp(k3*(F_z - 1))*C(3,3); 0; 0; 0;];
+        C_T_3_b  = [((1 - k3*F_z)/(F_z**2 * sig_33_f_c  ))*exp(k3*(F_z - 1))*C(3,1); ((1 - k3*F_z)/(F_z**2 * sig_33_f_c ))*exp(k3*(F_z - 1))*C(3,2); ((1 - k3*F_z)/(F_z**2 * sig_33_f_c  ))*exp(k3*(F_z - 1))*C(3,3); 0; 0; 0;];
 
       endif
       
@@ -388,9 +388,8 @@ else
         
     
     %%%%%%%%%  Tangent stiffness %%%%%%%%%
-    C_T  =  C_T_0 + C_T_1 + C_T_2 + C_T_3;
-  
-  
+    C_T  =  C_T_0 + C_T_1 + C_T_2 + C_T_3
+
 endif
 
   
@@ -420,7 +419,7 @@ elseif ttype == 1
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         
     end
-    A66=A66_num;
+    A66=A66_num
     
 end
 

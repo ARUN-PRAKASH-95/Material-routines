@@ -47,6 +47,7 @@ c
       write(iott,*) ' ************************************************'
       write(iott,*) ' * #DEBUG# UserMatLib.dll USERMAT               *'
       write(iott,*) ' ************************************************'
+      
       myvar = 99
       call myuserfunc(myvar)
 	
@@ -154,6 +155,7 @@ c
      &                    var6, var7, var8
 	
 
+
  
       V    = ustatev(1) 
       d1   = ustatev(2)
@@ -172,13 +174,13 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
-      sig_22_f_t = 500e6
-      sig_22_f_c = -1500e6
+      sig_22_f_t = 50e6
+      sig_22_f_c = -150e6
       sig_12_f   = 50e6
       G_c_1      = 12.5e6
       G_c_2      = 1e6
       G_c_3      = 1e6
-      L_c        = 1
+      L_c        = V**(1.0/3.0)
 	eta        =  0
       dmax = 1
       multiplier = 1e-3
@@ -196,7 +198,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       dsdeEl(3,3) = g_xy
       tsstif(1) = g_xy
      
-  
+
       
       eps_11_f_t = sig_11_f_t / (young_x/(ONE - pr_xy*pr_yx))
       eps_11_f_c = sig_11_f_c / (young_x/(ONE - pr_xy*pr_yx))
@@ -470,10 +472,10 @@ c *** Update stress i
               end do 
       
           else
-          
+
               do i=1,ncomp
                   do j=1,ncomp
-                      dsdePl(i,j) = C_T(i,j)        
+                      dsdePl(i,j) = abs(C_T(i,j))       
                   end do
               end do 
           
@@ -519,7 +521,7 @@ c *** Update stress i
               if (d1<=dmax) then
                   do i=1,ncomp
                       do j=1,ncomp
-                          dsdePl(i,j) = C_T_num(i,j)       
+                          dsdePl(i,j) = abs(C_T_num(i,j))       
                       end do
                   end do 
               else
@@ -533,8 +535,14 @@ c *** Update stress i
               
           endif
           
+
       endif
-                  
+      open(10,file='data.txt')
+      write(10,*)  ldstep
+      write(10,*)  isubst
+      do i=1,ncomp
+          write(10,*) (dsdePl(i,j), j = 1,ncomp)
+      enddo                  
                   
       
       return

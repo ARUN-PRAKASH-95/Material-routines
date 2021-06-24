@@ -29,7 +29,7 @@ addpath('analyt_sol/');
 % 3: linear loading and unloading, start and end point different
 % 4: full cycle with linear load change
 % 5: two cycles
-ltype=4;
+ltype=1;
 if ltype==1
     t=[0 10];
     lam=[0 0.1];
@@ -72,7 +72,7 @@ eps22=zeros(1,steps); eps33=zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-4;
 maxit=100;
-ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_hashins_stress(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);

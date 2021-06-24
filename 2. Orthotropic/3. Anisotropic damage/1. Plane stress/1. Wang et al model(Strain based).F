@@ -173,13 +173,13 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
-      sig_22_f_t = 50e6
-      sig_22_f_c = -200e6
+      sig_22_f_t = 500e6
+      sig_22_f_c = -1500e6
       sig_12_f   = 50e6
-      G_c_1      = 12.5e7
-      G_c_2      = 1e7
-      G_c_3      = 1e7
-      L_c        = V**(1/3)
+      G_c_1      = 12.5e6
+      G_c_2      = 1e6
+      G_c_3      = 1e6
+      L_c        = V**(1.0/3.0)
     
    
       

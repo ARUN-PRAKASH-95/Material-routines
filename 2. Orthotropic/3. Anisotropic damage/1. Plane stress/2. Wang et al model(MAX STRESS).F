@@ -157,7 +157,7 @@ c
       V    = ustatev(1) 
       d1   = ustatev(2)
       d2   = ustatev(3)
-      d3   = ONE - ((ONE - d1)*(ONE - d2))
+      d3   = ustatev(6)
       F_f  = ustatev(4)
       F_m  = ustatev(5) 
       
@@ -172,13 +172,13 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
       sig_22_f_t = 500e6
-      sig_22_f_c = -1500e6
+      sig_22_f_c = -1000e6
       sig_12_f   = 50e6
-      G_c_1      = 12.5e7
-      G_c_2      = 1e7
-      G_c_3      = 1e7
+      G_c_1      = 12.5e6
+      G_c_2      = 1e6
+      G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
-	eta        = 0.001
+	eta        = 0
 
 
      
@@ -298,7 +298,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_m > ONE) then
       
-          d2_new = ZERO
+          d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m 
       
           if (d2_new > d2) then
               d2 = d2_new
@@ -308,7 +308,7 @@ c*********   Damage evolution equations    ***********
         
         endif
       
-        d3  = ONE - ((ONE -d1)*(ONE - d2))
+        d3  = ONE - ((ONE - d1)*(ONE - d2))
           
 c*****      Inverse of the damage effect tensor  ********
         
@@ -338,18 +338,20 @@ c*******   Degraded stiffness  ********
            end do
         end do
         
-        dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE + eta - d1)
-        dsdeEl_d(1,2) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE+eta-d1)
+        dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE - d1)
+        dsdeEl_d(1,2) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE-d1)
+     &                   *(ONE - d2)
         dsdeEl_d(1,3) = ZERO
-        dsdeEl_d(2,1) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE+ eta-d2)
-        dsdeEl_d(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE+ eta - d2)
+        dsdeEl_d(2,1) = (pr_xy*young_y/(ONE-pr_xy*pr_yx))*(ONE-d2)
+     &                  *(ONE-d1)
+        dsdeEl_d(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE - d2)
         dsdeEl_d(2,3) = ZERO
         dsdeEl_d(3,1) = ZERO
         dsdeEl_d(3,2) = ZERO
-        dsdeEl_d(3,3) = g_xy*(ONE+eta-d3)
+        dsdeEl_d(3,3) = g_xy*(ONE - d3)
 
        
-        if (d1 == ZERO) then
+        if ((d1 == ZERO).OR.(d1<=ustatev(2))) then
           
           do i=1,ncomp
              do j=1,ncomp
@@ -366,18 +368,18 @@ c*******   Degraded stiffness  ********
 c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   ***********
  
 c**       For Tension          
-          if (sigma_eff(1)> 0)  then
+          if (sigma_eff(1)>= 0)  then
           
-            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_t*(ONE-d1)))
+            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_t))
      &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
-     &     * sig_11_f_t*(ONE-d1)))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
+     &     * sig_11_f_t))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
             
 c**       For Compression           
           else
               
-            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_c*(ONE-d1)))
+            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_c))
      &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
-     &     * sig_11_f_c*(ONE-d1)))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
+     &     * sig_11_f_c))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
             
           endif
       
@@ -391,7 +393,7 @@ c**       For Compression
             
         
 
-        if (d2 == ZERO) then
+        if ((d2 == ZERO).OR.(d2<=ustatev(3))) then
           
           do i=1,ncomp
              do j=1,ncomp
@@ -407,18 +409,18 @@ c**       For Compression
 c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
       
 c****      For Tension           
-          if (sigma_eff(2)> 0)  then
+          if (sigma_eff(2)>= 0)  then
           
-            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_t*(ONE-d2)))
+            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_t))
      &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
-     &     *sig_22_f_t*(ONE-d2)))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/)
+     &     *sig_22_f_t))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/)
      
 c**       For Compression                       
           else                                         
               
-            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_c*(ONE-d2)))
+            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_c))
      &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
-     &     *sig_22_f_c*(ONE-d2)))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/) 
+     &     *sig_22_f_c))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/) 
               
           endif
 
@@ -437,7 +439,14 @@ c**       For Compression
                C_T(i,j) = dsdeEl_d(i,j) + C_T_1(i,j) + C_T_2(i,j)
             end do
          end do
-            
+    
+         open(10,file='data.txt')
+         write(10,*)  ldstep
+         write(10,*)  isubst
+         do i=1,ncomp
+             write(10,*) (C_T(i,j), j = 1,ncomp)
+         enddo    
+                  
 
       endif
       
@@ -446,7 +455,7 @@ c**       For Compression
       ustatev(3) = d2
       ustatev(4) = F_f
       ustatev(5) = F_m
-
+      ustatev(6) = d3
       
  
       call vzero(stress,3)           
@@ -469,13 +478,12 @@ c *** Update stress i
           
           do i=1,ncomp
               do j=1,ncomp
-                  dsdePl(i,j) = C_T(i,j)        
+                  dsdePl(i,j) = C_T(i,j)       
               end do
           end do 
           
       endif  
-      
-      
+
       
       return
       end
