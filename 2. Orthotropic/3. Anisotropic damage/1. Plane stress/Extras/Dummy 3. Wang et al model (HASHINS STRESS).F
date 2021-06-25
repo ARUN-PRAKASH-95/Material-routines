@@ -345,10 +345,8 @@ c*******   Degraded stiffness  ********
         
         dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE - d1)
         dsdeEl_d(1,2) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE-d1)
-     &                   *(ONE - d2)
         dsdeEl_d(1,3) = ZERO
         dsdeEl_d(2,1) = (pr_xy*young_y/(ONE-pr_xy*pr_yx))*(ONE-d2)
-     &                  *(ONE-d1)
         dsdeEl_d(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE - d2)
         dsdeEl_d(2,3) = ZERO
         dsdeEl_d(3,1) = ZERO
@@ -373,17 +371,22 @@ c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   *******
  
 c**       For Tension          
           if (sigma_eff(1)> 0)  then
+              
+            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
           
-            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_t))
-     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
-     &     * sig_11_f_t))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
-            
+            C_T_1_b  = (/(term1*sigma_eff(1)*dsdeEl(1,1))
+     &   /(F_f*sig_11_f_t**2), (term1*sigma_eff(1)*dsdeEl(1,2))
+     &   /(F_f*sig_11_f_t**2), (alpha*sigma_eff(3)*term1*dsdeEl(3,3))
+     &    /(F_f*sig_12_f**2)/)        
 c**       For Compression           
           else
               
-            C_T_1_b  = (/((ONE - k1*F_f)/(F_f**2 * sig_11_f_c))
-     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
-     &     * sig_11_f_c))*exp(k1*(F_f -ONE))*dsdeEl(1,2),ZERO/)
+            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
+          
+            C_T_1_b  = (/(term1*sigma_eff(1)*dsdeEl(1,1))
+     &   /(F_f*sig_11_f_c**2), (term1*sigma_eff(1)*dsdeEl(1,2))
+     &   /(F_f*sig_11_f_c**2), (alpha*sigma_eff(3)*term1*dsdeEl(3,3))
+     &    /(F_f*sig_12_f**2)/)     
             
           endif
       
@@ -415,17 +418,21 @@ c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
 c****      For Tension           
           if (sigma_eff(2)> 0)  then
           
-            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_t))
-     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
-     &     *sig_22_f_t))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/)
-     
+            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+          
+            C_T_2_b  = (/(term2*sigma_eff(2)*dsdeEl(2,1))
+     &   /(F_m*sig_22_f_t**2), (term2*sigma_eff(2)*dsdeEl(2,2))
+     &   /(F_m*sig_22_f_t**2), (alpha*sigma_eff(3)*term2*dsdeEl(3,3))
+     &    /(F_m*sig_12_f**2)/) 
 c**       For Compression                       
           else                                         
               
-            C_T_2_b  = (/((ONE - k2*F_m)/(F_m**2 * sig_22_f_c))
-     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
-     &     *sig_22_f_c))*exp(k2*(F_m - ONE))*dsdeEl(2,2),ZERO/) 
-              
+            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+          
+            C_T_2_b  = (/(term2*sigma_eff(2)*dsdeEl(2,1))
+     &   /(F_m*sig_22_f_c**2), (term2*sigma_eff(2)*dsdeEl(2,2))
+     &   /(F_m*sig_22_f_c**2), (alpha*sigma_eff(3)*term2*dsdeEl(3,3))
+     &    /(F_m*sig_12_f**2)/) 
           endif
 
               

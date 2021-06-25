@@ -189,7 +189,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       G_c_1      = 12.5e7
       G_c_2      = 1e7
       G_c_3      = 1e7
-      L_c        = V**(1/3)
+      L_c        = V**(1.0/3.0)
     
    
       

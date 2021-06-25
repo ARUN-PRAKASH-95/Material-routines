@@ -71,7 +71,7 @@ s33 =zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-4;
 maxit=100;
-ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -103,7 +103,7 @@ for n=1:steps
          epsilon(4:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_strain(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_hashins_stress(epsilon,sdv(:,n),ttype);
         
         % 3.) partitioning
         sbar=partitiontri(s);

@@ -101,7 +101,7 @@ C(6,3) = 0;
 C(6,4) = 0;
 C(6,5) = 0;
 C(6,6) = g_xz;
-C;
+C
 
 eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_11_f_c = sig_11_f_c / ((1 -yz_zy) / (young_y*young_z*delta));
@@ -110,8 +110,8 @@ eps_22_f_c = sig_22_f_c / ((1 -zx_xz) / (young_x*young_z*delta));
 eps_33_f_t = sig_33_f_t / ((1 -xy_yx) / (young_x*young_y*delta));
 eps_33_f_c = sig_33_f_c / ((1 -xy_yx) / (young_x*young_y*delta));
 eps_12_f   = sig_12_f / g_xy;
-eps_13_f   = sig_13_f / g_yz;
-eps_23_f   = sig_23_f / g_xz;
+eps_13_f   = sig_13_f /  g_xz;
+eps_23_f   = sig_23_f / g_yz;
 
 % Create an empty effective stress vector
 sig6_eff = zeros(6,1);
@@ -260,9 +260,9 @@ else
       end
       
     endif
-    d1;
-    d2;
-    d3;
+    d1
+    d2
+    d3
 
 %%%%%%   Inverse of damage effect tensor (M_inverse)  %%%%%%%%  
     M_inv = zeros(6,6);
@@ -280,12 +280,18 @@ else
           sig6(i) = sig6(i) + M_inv(i,j)*sig6_eff(j);
        end
     end    
-    
+    sig6
    
 %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%
-    C_T_0 = M_inv*C;
-    
-    
+    C_T_0  = zeros(6,6);
+    for i = 1:6
+       for j = 1:6
+          for k = 1:6
+          C_T_0(i,j) = C_T_0(i,j) + (M_inv(i,k)*C(k,j));
+          end
+       end
+    end      
+    C_T_0
 %%%%%%%%%  Second term of the tangent stiffness   %%%%%%%% 
     if d1 == 0 | d1 == 1
       
@@ -297,7 +303,7 @@ else
 
 
       C_T_1_a = zeros(6,1);
-      C_T_1_a = [-sig6_eff(1); 0; 0; (0.5*(d2 -1)*sig6_eff(4))/M_inv(4,4); 0; (0.5*(d3 -1)*sig6_eff(6))/M_inv(6,6);];
+      C_T_1_a = [-sig6_eff(1); 0; 0; (0.5*(d2 -1)*sig6_eff(4))/M_inv(4,4); 0; (0.5*(d3 -1)*sig6_eff(6))/M_inv(6,6);]
 
       
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
@@ -314,8 +320,8 @@ else
         C_T_1_b  = [ ((1 - k1*F_f)/(F_f**2 * sig_11_f_c  ))*exp(k1*(F_f - 1))*C(1,1); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c  ))*exp(k1*(F_f - 1))*C(1,2); ((1 - k1*F_f)/(F_f**2 * sig_11_f_c  ))*exp(k1*(F_f - 1))*C(1,3); 0; 0; 0; ];
        
       endif
-      C_T_1_b;
-      C_T_1  =  C_T_1_a*C_T_1_b';
+      C_T_1_b
+      C_T_1  =  C_T_1_a*C_T_1_b'
      
     endif
     

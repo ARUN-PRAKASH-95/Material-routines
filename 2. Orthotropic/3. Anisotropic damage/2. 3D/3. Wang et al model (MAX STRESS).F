@@ -148,7 +148,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,V
+     &                    F_m_new,F_z_new,V,term3
 
       
       
@@ -178,17 +178,17 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
-      sig_22_f_t = 50e6
-      sig_22_f_c = -200e6
-      sig_33_f_t = 50e6
-      sig_33_f_c = -200e6
+      sig_22_f_t = 500e6
+      sig_22_f_c = -1500e6
+      sig_33_f_t = 500e6
+      sig_33_f_c = -1500e6
       sig_12_f   = 50e6
       sig_13_f   = 50e6
       sig_23_f   = 50e6
       G_c_1      = 12.5e7
       G_c_2      = 1e7
       G_c_3      = 1e7
-      L_c        = V**(1/3)
+      L_c        = V**(1.0/3.0)
     
    
       
@@ -423,7 +423,12 @@ c*******   Find nominal stress from effective stress ********
                sigma(i) = sigma(i) + (M_inv(i,j)*sigma_eff(j))        
            end do
         end do        
-        
+
+        do i = 1,ncomp
+            do j= 1,ncomp
+                C_T_0(i,j) = ZERO
+            end do
+        end do
 c********      Degraded stiffness   **********          
         do i=1,ncomp
            do j=1,ncomp
@@ -435,7 +440,7 @@ c********      Degraded stiffness   **********
         
         
         
-        if ((d1 == ZERO).OR.(d1==ONE))   then
+        if ((d1 == ZERO).OR.(d1==ONE))then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -445,31 +450,30 @@ c********      Degraded stiffness   **********
           
         else
             
-          C_T_1_a = (/-sigma_eff(1),ZERO,ZERO,(d2 - 1)*sigma_eff(4),
-     &               ZERO,(d3 - 1)*sigma_eff(6) /) 
+          C_T_1_a =(/-sigma_eff(1),ZERO,ZERO,(HALF*(d2- 1)*sigma_eff(4))
+     &    /M_inv(4,4),ZERO,(HALF*(d3 - 1)*sigma_eff(6))/M_inv(6,6)/) 
  
           
 c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   ***********
  
 c**       For Tension          
           if (sigma_eff(1)> 0)  then
+              
+            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
           
-            C_T_1_b  = (/ ((ONE - k1*F_f)/(F_f**2 * sig_11_f_t*(1-d1)))
-     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
-     &     * sig_11_f_t*(1-d1)))*exp(k1*(F_f - ONE))*dsdeEl(1,2),
-     &    ((ONE-k1*F_f)/(F_f**2 * sig_11_f_t*(1-d1)))*exp(k1*(F_f-ONE))
-     &     *dsdeEl(1,3),ZERO,ZERO,ZERO/)
-            
-            
+            C_T_1_b  = (/ (term1*dsdeEl(1,1))/sig_11_f_t,
+     &      (term1*dsdeEl(1,2))/sig_11_f_t,(term1*dsdeEl(1,3))
+     &      /sig_11_f_t,ZERO,ZERO,ZERO/)
+
             
 c**       For Compression           
           else
               
-            C_T_1_b  = (/ ((ONE - k1*F_f)/(F_f**2 * sig_11_f_c*(1-d1)))
-     &     *exp(k1*(F_f - ONE))*dsdeEl(1,1),  ((ONE - k1*F_f)/(F_f**2 
-     &     * sig_11_f_c*(1-d1)))*exp(k1*(F_f - ONE))*dsdeEl(1,2),
-     &    ((ONE-k1*F_f)/(F_f**2 * sig_11_f_c*(1-d1)))*exp(k1*(F_f-ONE))
-     &     *dsdeEl(1,3),ZERO,ZERO,ZERO/)
+            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
+          
+            C_T_1_b  = (/ (term1*dsdeEl(1,1))/sig_11_f_c,
+     &      (term1*dsdeEl(1,2))/sig_11_f_c,(term1*dsdeEl(1,3))
+     &      /sig_11_f_c,ZERO,ZERO,ZERO/)
             
           endif
       
@@ -483,7 +487,7 @@ c**       For Compression
             
         
 
-        if ((d2 == ZERO).OR.(d2 == ONE)) then
+        if ((d2 == ZERO).OR.(d2==ONE)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -493,29 +497,29 @@ c**       For Compression
       
         else 
             
-          C_T_2_a = (/ZERO,-sigma_eff(2),ZERO,(d1 - 1)*sigma_eff(4)
-     &               ,(d3 - 1)*sigma_eff(5),ZERO /) 
+          C_T_2_a =(/ZERO,-sigma_eff(2),ZERO,(HALF*(d1- 1)*sigma_eff(4))
+     &    /M_inv(4,4),(HALF*(d3 - 1)*sigma_eff(5))/M_inv(5,5),ZERO /) 
           
 c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
       
 c****      For Tension           
           if (sigma_eff(2)> 0)  then
+              
+            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
           
-            C_T_2_b  = (/ ((ONE - k2*F_m)/(F_m**2 * sig_22_f_t*(1-d2)))
-     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
-     &     * sig_22_f_t*(1-d2)))*exp(k2*(F_m - ONE))*dsdeEl(2,2),
-     &    ((ONE-k2*F_m)/(F_m**2 * sig_22_f_t*(1-d2)))*exp(k2*(F_m-ONE))
-     &     *dsdeEl(2,3),ZERO,ZERO,ZERO/) 
+            C_T_2_b  = (/ (term2*dsdeEl(2,1))/sig_22_f_t, 
+     &     (term2*dsdeEl(2,2))/sig_22_f_t,(term2*dsdeEl(2,3))
+     &     /sig_22_f_t,ZERO,ZERO,ZERO/) 
      
 c**       For Compression                       
           else                                         
               
-            C_T_2_b  = (/ ((ONE - k2*F_m)/(F_m**2 * sig_22_f_c*(1-d2)))
-     &     *exp(k2*(F_m - ONE))*dsdeEl(2,1),  ((ONE - k2*F_m)/(F_m**2 
-     &     * sig_22_f_c*(1-d2)))*exp(k2*(F_m - ONE))*dsdeEl(2,2),
-     &    ((ONE-k2*F_m)/(F_m**2 * sig_22_f_c*(1-d2)))*exp(k2*(F_m-ONE))
-     &     *dsdeEl(2,3),ZERO,ZERO,ZERO/)  
-              
+            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+          
+            C_T_2_b  = (/ (term2*dsdeEl(2,1))/sig_22_f_c, 
+     &     (term2*dsdeEl(2,2))/sig_22_f_c,(term2*dsdeEl(2,3))
+     &     /sig_22_f_c,ZERO,ZERO,ZERO/) 
+            
           endif
 
               
@@ -528,7 +532,7 @@ c**       For Compression
         endif      
       
       
-        if ((d3 == ZERO).OR.(d3 == ONE))   then
+        if ((d3 == ZERO).OR.(d3==ONE))then
       
               do i=1,ncomp
                  do j=1,ncomp
@@ -539,27 +543,29 @@ c**       For Compression
         else 
             
           C_T_3_a = (/ZERO,ZERO,-sigma_eff(3), ZERO,
-     &              (d2 - 1)*sigma_eff(5),(d1 - 1)*sigma_eff(6)/) 
+     &    (HALF*(d2 - 1)*sigma_eff(5))/M_inv(5,5),(HALF*(d1 - 1)
+     &    *sigma_eff(6))/M_inv(6,6) /) 
           
 c*****     Derivative of d3 with respect to strain (d_d3/d_epsilon)
           
 c****     For Tension 
           if (sigma_eff(3) > 0) then
               
-            C_T_3_b  = (/ ((ONE - k3*F_z)/(F_z**2 * sig_33_f_t*(1-d3)))
-     &     *exp(k3*(F_z - ONE))*dsdeEl(3,1),  ((ONE - k3*F_z)/(F_z**2 
-     &     * sig_33_f_t*(1-d3)))*exp(k3*(F_z - ONE))*dsdeEl(3,2),
-     &    ((ONE-k3*F_z)/(F_z**2 * sig_33_f_t*(1-d3)))*exp(k3*(F_z-ONE))
-     &     *dsdeEl(3,3),ZERO,ZERO,ZERO/)   
+            term3 = ((ONE-k3*F_z)*exp(k3*(F_z - ONE)))/(F_z**2)  
+              
+            C_T_3_b  = (/ (term3*dsdeEl(3,1))/sig_33_f_t,
+     &    (term3*dsdeEl(3,2))/sig_33_f_t,(term3*dsdeEl(3,3))/sig_33_f_t,
+     &    ZERO,ZERO,ZERO/)   
               
 c****     For Compression              
           else 
               
-            C_T_3_b  = (/ ((ONE - k3*F_z)/(F_z**2 * sig_33_f_c*(1-d3)))
-     &     *exp(k3*(F_z - ONE))*dsdeEl(3,1),  ((ONE - k3*F_z)/(F_z**2 
-     &     * sig_33_f_c*(1-d3)))*exp(k3*(F_z - ONE))*dsdeEl(3,2),
-     &    ((ONE-k3*F_z)/(F_z**2 * sig_33_f_c*(1-d3)))*exp(k3*(F_z-ONE))
-     &     *dsdeEl(3,3),ZERO,ZERO,ZERO/)  
+            term3 = ((ONE-k3*F_z)*exp(k3*(F_z - ONE)))/(F_z**2)  
+              
+            C_T_3_b  = (/ (term3*dsdeEl(3,1))/sig_33_f_c,
+     &    (term3*dsdeEl(3,2))/sig_33_f_c,(term3*dsdeEl(3,3))/sig_33_f_c,
+     &    ZERO,ZERO,ZERO/)  
+            
           endif
           
           do i = 1,mcomp
@@ -570,7 +576,12 @@ c****     For Compression
           
         endif
 
-  
+
+        do i = 1,ncomp
+            do j= 1,ncomp
+                C_T(i,j) = ZERO
+            end do
+        end do
 c*********   Tangent stiffness  
         do i=1,ncomp
            do j=1,ncomp
@@ -579,6 +590,56 @@ c*********   Tangent stiffness
            end do
         end do
       
+        open(10,file='data.txt')
+        write(10,*)  ldstep
+        write(10,*)  isubst
+        write(10,*)  '        '
+        write(10,*)  'C_matrix'
+        do i=1,ncomp
+             write(10,*) (dsdeEl(i,j), j = 1,ncomp)
+        enddo
+        
+        write(10,*)  '        '
+        write(10,*) d1
+        write(10,*) d2
+        write(10,*) d3
+        
+        write(10,*)  '        '
+        write(10,*)  'Stress'
+        do i=1,ncomp
+             write(10,*) sigma(i)
+        enddo  
+        
+       
+        write(10,*)  '        '
+        write(10,*)  'C_T_0 matrix'
+        do i=1,ncomp
+             write(10,*) (C_T_0(i,j), j = 1,ncomp)
+        enddo 
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T_1_a'
+        do i=1,ncomp
+             write(10,*) C_T_1_a(i)
+        enddo
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T_1_b'
+        do i=1,ncomp
+             write(10,*) C_T_1_b(i)
+        enddo
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T_1 matrix'
+        do i=1,ncomp
+             write(10,*) (C_T_1(i,j), j = 1,ncomp)
+        enddo 
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T matrix'       
+        do i=1,ncomp
+             write(10,*) (C_T(i,j), j = 1,ncomp)
+        enddo 
       
       endif
       

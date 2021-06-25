@@ -328,12 +328,6 @@ c*******   Find nominal stress from effective stress ********
            end do
         end do 
         
-        do i = 1,ncomp
-            do j= 1,ncomp
-                C_T_0(i,j) = ZERO
-            end do
-        end do
-        
 c*******   Degraded stiffness  ********
         do i=1,ncomp
            do j=1,ncomp
@@ -376,7 +370,8 @@ c**       For Tension
             term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
               
             C_T_1_b  = (/ (term1*dsdeEl(1,1))/sig_11_f_t, 
-     &     (term1*dsdeEl(1,2))/sig_11_f_t,ZERO/) 
+     &    (term1*sigma_eff(1)*dsdeEl(1,2))/(F_f*sig_11_f_t**2),
+     &   ZERO/) 
 
 c**       For Compression           
           else
@@ -440,11 +435,6 @@ c**       For Compression
               
         endif   
         
-        do i = 1,ncomp
-            do j= 1,ncomp
-                C_T(i,j) = ZERO
-            end do
-        end do
 
          do i=1,ncomp
             do j=1,ncomp

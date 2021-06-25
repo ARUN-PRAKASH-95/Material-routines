@@ -101,7 +101,7 @@ C(6,3) = 0;
 C(6,4) = 0;
 C(6,5) = 0;
 C(6,6) = g_xz;
-
+C
 
 eps_11_f_t = sig_11_f_t / ((1 -yz_zy) / (young_y*young_z*delta));
 eps_11_f_c = sig_11_f_c / ((1 -yz_zy) / (young_y*young_z*delta));
@@ -282,9 +282,16 @@ else
        end
     end    
     
-   
+    C_T_0  = zeros(6,6);
+    for i = 1:6
+       for j = 1:6
+          for k = 1:6
+          C_T_0(i,j) = C_T_0(i,j) + (M_inv(i,k)*C(k,j));
+          end
+       end
+    end      
 %%%%%%%%%%%   Degraded stiffness  %%%%%%%%%%%%
-    C_T_0 = M_inv*C
+    C_T_0 
     
     if d1 == 0 | d1==1
       
@@ -295,7 +302,7 @@ else
       %%%%%%%%% First term C_T_1 ((d_C_d/d1 : eps) outerProduct (d_d1/d_epsilon))   %%%%%%%%%%
 
       C_T_1_a = zeros(6,1);
-      C_T_1_a = [-sig6_eff(1); 0; 0; (d2 -1)*sig6_eff(4); 0; (d3 -1)*sig6_eff(6);]
+      C_T_1_a = [-sig6_eff(1); 0; 0; (0.5*(d2 -1)*sig6_eff(4))/M_inv(4,4); 0; (0.5*(d3 -1)*sig6_eff(6))/M_inv(6,6);]
 
       
       %%%%%%%%%%%%%%%%   Derivative of d1 with respect to strain (d_d1/d_epsilon)  %%%%%%%%%%%%%
@@ -329,7 +336,7 @@ else
       %%%%%%%%% Second term C_T_2 ((d_C_d/d2 : eps) outerProduct (d_d2/d_epsilon))   %%%%%%%%%%
 
       C_T_2_a = zeros(6,1);
-      C_T_2_a = [ 0; -sig6_eff(2); 0; (d1 -1)*sig6_eff(4); (d3 -1)*sig6_eff(5); 0; ];
+      C_T_2_a = [ 0; -sig6_eff(2); 0; (0.5*(d1 -1)*sig6_eff(4))/M_inv(4,4); (0.5*(d3 -1)*sig6_eff(5))/M_inv(5,5) ; 0; ];
 
     %%%%%%%%%%%%%%%%   Derivative of d2 with respect to strain (d_d2/d_epsilon)  %%%%%%%%%%%%%
 
@@ -363,7 +370,7 @@ else
       %%%%%%%%% Third term C_T_3 ((d_C_d/d3 : eps) outerProduct (d_d3/d_epsilon))  %%%%%%%%%%
       
       C_T_3_a = zeros(6,1);
-      C_T_3_a = [ 0; 0; -sig6_eff(3);  0;  (d2 -1)*sig6_eff(5); (d1 -1)*sig6_eff(6);  ];
+      C_T_3_a =  [0; 0; -sig6_eff(3);  0;  (0.5*(d2 -1)*sig6_eff(5))/M_inv(5,5); (0.5*(d1 -1)*sig6_eff(6))/M_inv(6,6);  ];
 
     %%%%%%%%%%%%%%%%   Derivative of d3 with respect to strain (d_d3/d_epsilon)  %%%%%%%%%%%%%
      

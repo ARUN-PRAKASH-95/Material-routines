@@ -21,6 +21,6 @@ matp(15) = 12.5e7;           % Longitudinal Tensile fracture energy
 matp(16) = 12.5e7;           % Longitudinal Compressive fracture energy
 matp(17) = 1e7;              % Transverse tensile fracture energy
 matp(18) = 1e7;              % Transverse compressive fracture energy
-matp(19) = 1**(1/3);             % Characteristic length
+matp(19) = 0.125**(1/3);             % Characteristic length
 
 end

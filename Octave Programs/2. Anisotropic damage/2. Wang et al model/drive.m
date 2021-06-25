@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_hashins_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -132,7 +132,7 @@ close(wb)
 %fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
-
+#{
 data = [time; e11; s11; eps22; eps33;];
 
 fileID = fopen('output_max_stress_C_d.txt','w');
@@ -176,7 +176,7 @@ plot(e11,sdv(1,:),'or-')
 #legend('G_c_1 = 12.5e7 N/m','Ref.','Location','East')
 xlabel('\epsilon_{11}')
 ylabel('d1')
-
+#{
 % plot damage
 figure(5)
 plot(e11,sdv(2,:),'or-')

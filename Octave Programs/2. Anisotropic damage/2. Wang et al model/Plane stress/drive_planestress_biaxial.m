@@ -95,7 +95,7 @@ for n=1:steps
         
         % 1.) total deformation
          epsilon(1,1) = e11(n+1);
-         epsilon(2,1) = e22(n+1);
+         epsilon(2,1) = -e22(n+1);
          epsilon(3,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
@@ -125,7 +125,7 @@ end % for
 fprintf('********************\n')
 close(wb)
 %
-s
+
 %fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
