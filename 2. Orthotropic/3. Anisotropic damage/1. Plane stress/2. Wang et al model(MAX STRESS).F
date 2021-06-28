@@ -354,7 +354,7 @@ c*******   Degraded stiffness  ********
         dsdeEl_d(3,3) = g_xy*(ONE-d3)
 
        
-        if ((d1 == ZERO).OR.(d1<=ustatev(2))) then
+        if ((d1 == ZERO)) then
           
           do i=1,ncomp
              do j=1,ncomp
@@ -398,7 +398,7 @@ c**       For Compression
             
         
 
-        if ((d2 == ZERO).OR.(d2<=ustatev(3))) then
+        if ((d2 == ZERO)) then
           
           do i=1,ncomp
              do j=1,ncomp

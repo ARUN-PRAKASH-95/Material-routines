@@ -147,7 +147,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,D,V,alpha
+     &                    F_m_new,F_z_new,D,V,alpha,eta
 
       
       
@@ -158,7 +158,6 @@ c
       V    = ustatev(1) 
       d1   = ustatev(2)
       d2   = ustatev(3)
-      d3   = ustatev(6)
       F_f  = ustatev(4)
       F_m  = ustatev(5)  
       
@@ -180,7 +179,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
       alpha = ZERO
-
+      eta =0
 
      
 ********* ELASTIC STIFFNESS MATRIX *********
@@ -360,7 +359,7 @@ c*******   Degraded stiffness  ********
         dsdeEl_d(3,3) = g_xy*(ONE-d3)
         
         
-        if ((d1 == ZERO).OR.(d1<=ustatev(2))) then
+        if ((d1 == ZERO)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -406,7 +405,7 @@ c**       For Compression
             
         
 
-        if ((d2 == ZERO).OR.(d2<=ustatev(3))) then
+        if ((d2 == ZERO)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -463,13 +462,7 @@ c*********   Tangent stiffness
            end do
         end do
 
-        open(10,file='data.txt')
-        write(10,*)  ldstep
-        write(10,*)  isubst
-        do i=1,ncomp
-           write(10,*) (C_T(i,j), j = 1,ncomp)
-        enddo   
-      
+
       
       endif
       
