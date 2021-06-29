@@ -179,8 +179,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
       alpha = ZERO
-      eta =0
-
+      
      
 ********* ELASTIC STIFFNESS MATRIX *********
 	
@@ -348,15 +347,21 @@ c*******   Degraded stiffness  ********
            end do
         end do
         
-        dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE - d1)
-        dsdeEl_d(1,2) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE-d1)
+        if ((d1>=0.99) .OR. (d2>=0.99)) then
+            eta = 1e-3
+        else
+            eta = ZERO
+        endif
+        
+        dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE+eta- d1)
+        dsdeEl_d(1,2) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE+eta-d1)
         dsdeEl_d(1,3) = ZERO
-        dsdeEl_d(2,1) = (pr_xy*young_y/(ONE-pr_xy*pr_yx))*(ONE-d2)
-        dsdeEl_d(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE - d2)
+        dsdeEl_d(2,1) = (pr_xy*young_y/(ONE-pr_xy*pr_yx))*(ONE+eta-d2)
+        dsdeEl_d(2,2) = (young_y/(ONE - pr_xy*pr_yx))*(ONE+eta- d2)
         dsdeEl_d(2,3) = ZERO
         dsdeEl_d(3,1) = ZERO
         dsdeEl_d(3,2) = ZERO
-        dsdeEl_d(3,3) = g_xy*(ONE-d3)
+        dsdeEl_d(3,3) = g_xy*(ONE+eta-d3)
         
         
         if ((d1 == ZERO)) then
@@ -449,19 +454,13 @@ c**       For Compression
               
         endif      
       
-        do i = 1,ncomp
-            do j= 1,ncomp
-                C_T(i,j) = ZERO
-            end do
-        end do
-        
-c*********   Tangent stiffness  
-        do i=1,ncomp
-           do j=1,ncomp
-              C_T(i,j)   = dsdeEl_d(i,j)  +  C_T_1(i,j) + C_T_2(i,j) 
-           end do
-        end do
 
+        
+       do i=1,ncomp
+           do j=1,ncomp
+             C_T(i,j)   = dsdeEl_d(i,j)  +  C_T_1(i,j) + C_T_2(i,j) 
+           end do
+       end do
 
       
       endif

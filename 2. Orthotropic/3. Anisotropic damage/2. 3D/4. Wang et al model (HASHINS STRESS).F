@@ -185,9 +185,9 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       sig_12_f   = 50e6
       sig_13_f   = 50e6
       sig_23_f   = 50e6
-      G_c_1      = 12.5e7
-      G_c_2      = 1e7
-      G_c_3      = 1e7
+      G_c_1      = 12.5e6
+      G_c_2      = 1e6
+      G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
     
    
@@ -445,7 +445,7 @@ c********      Degraded stiffness   **********
 
  
         
-        if ((d1 == ZERO).OR.(d1<=ustatev(2))) then
+        if ((d1 == ZERO)) then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -496,7 +496,7 @@ c**       For Compression
             
         
 
-        if ((d2 == ZERO).OR.(d2<=ustatev(3)))  then
+        if ((d2 == ZERO))  then
           
           do i=1,mcomp
              do j=1,mcomp
@@ -555,7 +555,7 @@ c**       For Compression
         endif      
       
       
-        if ((d3 == ZERO).OR.(d3<=ustatev(4)))  then
+        if ((d3 == ZERO))  then
       
               do i=1,ncomp
                  do j=1,ncomp
