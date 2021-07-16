@@ -51,7 +51,7 @@ c
 	
 	
 
-	if (ncomp == 3) then
+	if ((ncomp == 3).AND.(ustatev(2)<0.9).AND.(ustatev(3)<0.7)) then
 	
 		
 		call usermatps (
@@ -171,7 +171,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
-      sig_22_f_t = 500e6
+      sig_22_f_t = 1000e6
       sig_22_f_c = -1000e6
       sig_12_f   = 50e6
       G_c_1      = 12.5e6
@@ -193,7 +193,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       dsdeEl(3,2) = ZERO
       dsdeEl(3,3) = g_xy
       tsstif(1) = g_xy
-
+      eta = ZERO
   
       
       eps_11_f_t = sig_11_f_t / (young_x/(ONE - pr_xy*pr_yx))
@@ -270,16 +270,16 @@ c********    Update stress
           
 c*********  Terms in damage evolution equations   ***********
         if (sigma_eff(1) >= 0) then
-          k1 =   (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1
+          k1 =  -ONE
         else 
-          k1 =   (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1
+          k1 =  -ONE
         endif
         
         
         if (sigma_eff(2)  >= 0) then
-          k2 =  (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2
+          k2 =  -ONE
         else 
-          k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2
+          k2 =  -ONE
         endif
       
         
@@ -310,7 +310,16 @@ c*********   Damage evolution equations    ***********
           endif
         
         endif
-      
+        
+        if (d1>=0.9) then
+            d1 = 0.9
+        endif
+        
+        if (d2>=0.9) then
+            d2 = 0.9
+        endif
+
+
         d3  = ONE - ((ONE - d1)*(ONE - d2))
 
 c*****      Inverse of the damage effect tensor  ********
@@ -346,12 +355,7 @@ c*******   Degraded stiffness  ********
                end do
            end do
         end do
-        
-        if ((d1>=0.99) .OR. (d2>=0.99)) then
-            eta = 1e-3
-        else
-            eta = ZERO
-        endif
+
         
         dsdeEl_d(1,1) = (young_x/(ONE - pr_xy*pr_yx))*(ONE+eta- d1)
         dsdeEl_d(1,2) = (pr_xy *young_y/(ONE-pr_xy*pr_yx))*(ONE+eta-d1)
@@ -455,14 +459,71 @@ c**       For Compression
         endif      
       
 
+        do i = 1,ncomp
+            do j= 1,ncomp
+                C_T(i,j) = ZERO
+            end do
+        end do
         
-       do i=1,ncomp
-           do j=1,ncomp
-             C_T(i,j)   = dsdeEl_d(i,j)  +  C_T_1(i,j) + C_T_2(i,j) 
-           end do
-       end do
+        do i=1,ncomp
+            do j=1,ncomp
+                  C_T(i,j)   = dsdeEl_d(i,j)  +  C_T_1(i,j) + C_T_2(i,j) 
+            end do
+        end do
+           
+       
 
-      
+        open(10,file='data.txt')
+        write(10,*)  ldstep
+        write(10,*)  isubst
+        write(10,*)  '        '
+        write(10,*)  'C_matrix'
+        do i=1,ncomp
+             write(10,*) (dsdeEl(i,j), j = 1,ncomp)
+        enddo
+        
+        write(10,*)  '        '
+        write(10,*) d1
+        write(10,*) d2
+        write(10,*) d3
+        
+        write(10,*)  '        '
+        write(10,*)  'Stress'
+        do i=1,ncomp
+             write(10,*) sigma(i)
+        enddo  
+        
+       
+        write(10,*)  '        '
+        write(10,*)  'C_T_0 matrix'
+        do i=1,ncomp
+             write(10,*) (C_T_0(i,j), j = 1,ncomp)
+        enddo 
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T_1_a'
+        do i=1,ncomp
+             write(10,*) C_T_1_a(i)
+        enddo
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T_1_b'
+        do i=1,ncomp
+             write(10,*) C_T_1_b(i)
+        enddo
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T_1 matrix'
+        do i=1,ncomp
+             write(10,*) (C_T_1(i,j), j = 1,ncomp)
+        enddo 
+        
+        write(10,*)  '        '
+        write(10,*)  'C_T matrix'       
+        do i=1,ncomp
+             write(10,*) (C_T(i,j), j = 1,ncomp)
+        enddo 
+                  
       endif
       
 
