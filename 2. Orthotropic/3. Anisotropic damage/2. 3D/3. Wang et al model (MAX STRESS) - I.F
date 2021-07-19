@@ -178,10 +178,10 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
-      sig_22_f_t = 500e6
-      sig_22_f_c = -1500e6
-      sig_33_f_t = 500e6
-      sig_33_f_c = -1500e6
+      sig_22_f_t = 300e6
+      sig_22_f_c = -600e6
+      sig_33_f_t = 150e6
+      sig_33_f_c = -500e6
       sig_12_f   = 50e6
       sig_13_f   = 50e6
       sig_23_f   = 50e6
@@ -189,7 +189,6 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       G_c_2      = 1e6
       G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
-    
    
       
 	pr_yx = (young_y * pr_xy) / young_x
@@ -378,7 +377,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_m > 1) then
       
-          d2_new =  ZERO
+          d2_new =  ONE  - (exp(k2*(F_m- ONE)))/F_m
           
           if (d2_new > d2) then
               d2 = d2_new
@@ -391,7 +390,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_z > 1) then
       
-          d3_new = ZERO
+          d3_new = ONE  - (exp(k3*(F_z - ONE)))/F_z
           
           if (d3_new > d3) then
               d3 = d3_new
@@ -401,7 +400,7 @@ c*********   Damage evolution equations    ***********
           
         endif 
         
-
+        
 c*****      Inverse of the damage effect tensor  ********
         
         do i = 1,ncomp
