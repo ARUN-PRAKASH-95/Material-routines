@@ -47,6 +47,7 @@ c
       write(iott,*) ' ************************************************'
       write(iott,*) ' * #DEBUG# UserMatLib.dll USERMAT               *'
       write(iott,*) ' ************************************************'
+      
       myvar = 99
       call myuserfunc(myvar)
 	
@@ -154,6 +155,7 @@ c
      &                    var6, var7, var8
 	
 
+
  
       V    = ustatev(1) 
       d1   = ustatev(2)
@@ -172,12 +174,12 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       
       sig_11_f_t = 2500e6
       sig_11_f_c = -2000e6
-      sig_22_f_t = 500e6
-      sig_22_f_c = -1500e6
+      sig_22_f_t = 50e6
+      sig_22_f_c = -150e6
       sig_12_f   = 50e6
-      G_c_1      = 12.5e7
-      G_c_2      = 1e7
-      G_c_3      = 1e7
+      G_c_1      = 12.5e6
+      G_c_2      = 1e6
+      G_c_3      = 1e6
       L_c        = V**(1.0/3.0)
 	eta        =  0
       dmax = 1
@@ -196,7 +198,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
       dsdeEl(3,3) = g_xy
       tsstif(1) = g_xy
      
-  
+
       
       eps_11_f_t = sig_11_f_t / (young_x/(ONE - pr_xy*pr_yx))
       eps_11_f_c = sig_11_f_c / (young_x/(ONE - pr_xy*pr_yx))
@@ -286,7 +288,7 @@ c*********  Terms in damage evolution equations   ***********
 c*********   Damage evolution equations    *********** 	  
         if (F_f > ONE) then
       
-          d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f 
+          d1_new = ONE  - (exp(k1*(F_f - ONE)))/F_f 
       
           if (d1_new > d1) then
               d1 = d1_new
@@ -299,7 +301,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_m > ONE) then
       
-          d2_new = ZERO
+          d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m 
       
           if (d2_new > d2) then
               d2 = d2_new
@@ -323,11 +325,7 @@ c*****      Inverse of the damage effect tensor  ********
         M_inv(2,2)  = (ONE - d2)
         M_inv(3,3)  = (ONE - d3)
 
-        do i=1,ncomp
-           do j=1,ncomp
-               sigma(i) = sigma(i) + (M_inv(i,j)*sigma_eff(j))        
-           end do
-        end do 
+
 
 c*******   Degraded stiffness  ********
         do i=1,ncomp
@@ -348,7 +346,12 @@ c*******   Degraded stiffness  ********
         dsdeEl_d(3,2) = ZERO
         dsdeEl_d(3,3) = g_xy*(ONE+eta-d3)
 
-
+c********    Compute stress              
+        do i=1,ncomp
+          do j=1,ncomp
+              sigma(i) = sigma(i) + (dsdeEl_d(i,j)*T_strain(j))        
+          end do
+        end do 
         
        
         if (d1 == ZERO) then
@@ -469,10 +472,10 @@ c *** Update stress i
               end do 
       
           else
-          
+
               do i=1,ncomp
                   do j=1,ncomp
-                      dsdePl(i,j) = C_T(i,j)        
+                      dsdePl(i,j) = abs(C_T(i,j))       
                   end do
               end do 
           
@@ -492,7 +495,7 @@ c *** Update stress i
           else
           
               do i = 1,ncomp
-                  hper = 1e-12
+                  hper = 1e-15
                   dStrain(i) = dStrain(i) + hper
                   ttype = 0
                   call usermatps (
@@ -518,7 +521,7 @@ c *** Update stress i
               if (d1<=dmax) then
                   do i=1,ncomp
                       do j=1,ncomp
-                          dsdePl(i,j) = C_T_num(i,j)       
+                          dsdePl(i,j) = abs(C_T_num(i,j))       
                       end do
                   end do 
               else
@@ -532,8 +535,14 @@ c *** Update stress i
               
           endif
           
+
       endif
-                  
+      open(10,file='data.txt')
+      write(10,*)  ldstep
+      write(10,*)  isubst
+      do i=1,ncomp
+          write(10,*) (dsdePl(i,j), j = 1,ncomp)
+      enddo                  
                   
       
       return

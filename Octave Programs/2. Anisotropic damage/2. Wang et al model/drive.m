@@ -32,19 +32,19 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.1];
+    lam=[0 0.2];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];
 elseif ltype==3
     t=[0 5 10];
-    lam=[0 0.1 0.0000];
+    lam=[0 0.0015 0.0000];
 elseif ltype==4
     t=[0 2.5 7.5 10];
-    lam=[0 0.08 -0.1];
+    lam=[0 n_ampl*sigma_y0/2/mu/(1-q_el) -n_ampl*sigma_y0/2/mu/(1-q_el)];
 elseif ltype==5
     t=[0 2.5 7.5 12.5 17.5 22.5 25.0];
-    lam=[0 0.1 -0.1];
+    lam=[0 0.005 -0.005];
 end
 
 %--------------------------------------------------------------------------
@@ -72,7 +72,7 @@ eps22=zeros(1,steps); eps33=zeros(1,steps);
 % tolerance and maximum no. of iterations for Newton iteration
 tol=1e-4;
 maxit=100;
-ttype = 1; % 0: analytical, 1: numerical tangent moduli computation
+ttype = 0; % 0: analytical, 1: numerical tangent moduli computation
 
 % initialize waitbar
 wb=waitbar(0,'computation in progress...');
@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_max_stress(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_strain(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -115,11 +115,11 @@ for n=1:steps
         disp(['|sbar| = ', num2str(norm(sbar))])
         
     end % while
-   
+  
    
     % update of internal variables after obtaining convergence
     sdv(:,n+1) = sdvup;
-    
+    %s
     % store quantities for post-processing
     s11(n+1)=s(1);
     eps22(n+1)=epsilon(2); eps33(n+1)=epsilon(3); 
@@ -132,10 +132,10 @@ close(wb)
 %fprintf('eps11 %f\n', e11);
 %fprintf('eps22 %f\n', eps22);
 %fprintf('eps33 %f\n', eps33);
-#{
+
 data = [time; e11; s11; eps22; eps33;];
 
-fileID = fopen('output_max_stress_C_d.txt','w');
+fileID = fopen('output_stress.txt','w');
 fprintf(fileID,'%2s %15s %15s %15s %15s\n','n','Epsilon_{11}','Sigma_{11}','Epsilon_{22}','Epsilon_{33}');
 fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%3.1f %15.5f %15.5f %15.5f %15.5f\n',data);
@@ -153,8 +153,8 @@ ylabel('e11')
 figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'or-')
-#legend('G_c_1 = 12.5e7 N/m','Ref.','Location','NorthEast')
+plot(e11,s11,'ob-')
+#legend('\sigma_{11}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
 ylabel('\sigma_{11} (N/m^2)')
  
@@ -165,7 +165,9 @@ figure(3)
 plot(e11,eps22,'ob-')
 hold on
 plot(e11,eps33,'og-')
-legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','NorthEast')
+#title('Computed using Algorithmic tangent')
+#title('Computed using Numerical Perturbation')
+legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','SouthEast')
 xlabel('\epsilon_{11}')
 ylabel('\epsilon_{22},\epsilon_{33}')
 
@@ -173,42 +175,43 @@ ylabel('\epsilon_{22},\epsilon_{33}')
 % plot damage
 figure(4)
 plot(e11,sdv(1,:),'or-')
-#legend('G_c_1 = 12.5e7 N/m','Ref.','Location','East')
-xlabel('\epsilon_{11}')
+#legend('d1','Ref.','Location','West')
+xlabel('eps11')
 ylabel('d1')
-#{
+
+
 % plot damage
 figure(5)
 plot(e11,sdv(2,:),'or-')
-legend('G_c_2 = 1e7 N/m','Ref.','Location','SouthEast')
-xlabel('\epsilon_{11}')
+#legend('d2','Ref.','Location','West')
+xlabel('eps11')
 ylabel('d2')
 
 % plot damage
 figure(6)
 plot(e11,sdv(3,:),'or-')
-legend('G_c_2 = 1e7 N/m','Ref.','Location','SouthEast')
-xlabel('\epsilon_{11}')
+#legend('d3','Ref.','Location','West')
+xlabel('eps11')
 ylabel('d3')
 
 
 figure(7)
 plot(e11,sdv(4,:),'r-')
-legend('F_f','Ref.','Location','West')
-xlabel('\epsilon_{11}')
+#legend('F_f','Ref.','Location','West')
+xlabel('eps11')
 ylabel('F_f')
 
 % plot damage
 figure(8)
-plot(e11,sdv(5,:),'or-')
-legend('F_m','Ref.','Location','West')
-xlabel('\epsilon_{11}')
+plot(e11,sdv(5,:),'r-')
+#legend('F_m','Ref.','Location','West')
+xlabel('eps11')
 ylabel('F_m')
 
 % plot damage
 figure(9)
-plot(e11,sdv(6,:),'or-')
-legend('F_z','Ref.','Location','West')
-xlabel('\epsilon_{11}')
+plot(e11,sdv(6,:),'r-')
+#legend('F_z','Ref.','Location','West')
+xlabel('eps11')
 ylabel('F_z')
 

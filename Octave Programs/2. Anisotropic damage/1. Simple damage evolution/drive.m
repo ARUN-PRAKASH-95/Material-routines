@@ -153,10 +153,10 @@ ylabel('e11')
 figure(2);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'or-')
-legend('\sigma_{11}','Ref.','Location','NorthEast')
+plot(e11,s11,'ob-')
+#legend('\sigma_{11}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
-ylabel('\sigma_{11}')
+ylabel('\sigma_{11} (N/m^2)')
  
 
  
@@ -165,7 +165,8 @@ figure(3)
 plot(e11,eps22,'ob-')
 hold on
 plot(e11,eps33,'og-')
-title('Computed using Algorithmic tangent')
+#title('Computed using Algorithmic tangent')
+title('Computed using Numerical Perturbation')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','SouthEast')
 xlabel('\epsilon_{11}')
 ylabel('\epsilon_{22},\epsilon_{33}')
@@ -174,42 +175,43 @@ ylabel('\epsilon_{22},\epsilon_{33}')
 % plot damage
 figure(4)
 plot(e11,sdv(1,:),'or-')
-legend('d1','Ref.','Location','West')
+#legend('d1','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d1')
 
+#{
 % plot damage
 figure(5)
 plot(e11,sdv(2,:),'or-')
-legend('d2','Ref.','Location','West')
+#legend('d2','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d2')
 
 % plot damage
 figure(6)
 plot(e11,sdv(3,:),'or-')
-legend('d3','Ref.','Location','West')
+#legend('d3','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d3')
 
 
 figure(7)
 plot(e11,sdv(4,:),'r-')
-legend('F_f','Ref.','Location','West')
+#legend('F_f','Ref.','Location','West')
 xlabel('eps11')
 ylabel('F_f')
 
 % plot damage
 figure(8)
 plot(e11,sdv(5,:),'r-')
-legend('F_m','Ref.','Location','West')
+#legend('F_m','Ref.','Location','West')
 xlabel('eps11')
 ylabel('F_m')
 
 % plot damage
 figure(9)
 plot(e11,sdv(6,:),'r-')
-legend('F_z','Ref.','Location','West')
+#legend('F_z','Ref.','Location','West')
 xlabel('eps11')
 ylabel('F_z')
 

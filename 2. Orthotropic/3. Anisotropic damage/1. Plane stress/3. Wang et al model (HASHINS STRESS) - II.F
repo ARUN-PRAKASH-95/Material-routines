@@ -52,7 +52,7 @@ c
 	
 	
 
-	if ((ncomp == 3).AND.(ustatev(2)<0.9).AND.(ustatev(3)<0.9)) then
+	if ((ncomp == 3)) then
 	
 		
 		call usermatps (
@@ -147,7 +147,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,D,V,alpha,eta
+     &                    F_m_new,F_z_new,D,V,alpha,eta,d1_max,d2_max
 
       
       
@@ -191,7 +191,7 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	dsdeEl(3,1) = ZERO
       dsdeEl(3,2) = ZERO
       dsdeEl(3,3) = g_xy
-      tsstif(1) = g_xy
+      
       eta = ZERO
   
       
@@ -263,7 +263,7 @@ c********    Update stress
          do i=1,ncomp
             sigma(i) = sigma_eff(i)       
          end do  
-        
+        tsstif(1) = g_xy
       
       else
           
@@ -282,12 +282,13 @@ c*********  Terms in damage evolution equations   ***********
         endif
       
         
-       
+        d1_max = 0.9999999
+        d2_max = 0.9999999
 
 c*********   Damage evolution equations    *********** 	  
         if (F_f > 1) then
       
-          d1_new =  ONE  - (exp(k1*(F_f - ONE)))/F_f
+          d1_new =  d1_max*(ONE  - (exp(k1*(F_f - ONE)))/F_f)
       
           if (d1_new > d1) then
               d1 = d1_new
@@ -300,7 +301,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_m > 1) then
       
-          d2_new = ONE  - (exp(k2*(F_m - ONE)))/F_m
+          d2_new = d2_max*(ONE  - (exp(k2*(F_m - ONE)))/F_m)
       
           if (d2_new > d2) then
               d2 = d2_new
@@ -310,16 +311,7 @@ c*********   Damage evolution equations    ***********
         
         endif
         
-        if (d1>=0.9) then
-            d1 = 0.9
-        endif   
-        
-        if (d2>=0.9) then
-            d2 = 0.9
-        endif        
-
-
-        
+       
         d3  = ONE - ((ONE - d1)*(ONE - d2))
 
 c*****      Inverse of the damage effect tensor  ********
@@ -369,7 +361,7 @@ c*******   Degraded stiffness  ********
         dsdeEl_d(3,1) = ZERO
         dsdeEl_d(3,2) = ZERO
         dsdeEl_d(3,3) = g_xy*(ONE+eta-d3)
-        
+        tsstif(1) = g_xy*(ONE+eta-d3)
         
         if ((d1 == ZERO)) then
           
@@ -389,7 +381,7 @@ c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   *******
 c**       For Tension          
           if (sigma_eff(1)> 0)  then
               
-            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
+            term1 = d1_max*((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
           
             C_T_1_b  = (/(term1*sigma_eff(1)*dsdeEl(1,1))
      &   /(F_f*sig_11_f_t**2), (term1*sigma_eff(1)*dsdeEl(1,2))
@@ -398,7 +390,7 @@ c**       For Tension
 c**       For Compression           
           else
               
-            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
+            term1 = d1_max*((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
           
             C_T_1_b  = (/(term1*sigma_eff(1)*dsdeEl(1,1))
      &   /(F_f*sig_11_f_c**2), (term1*sigma_eff(1)*dsdeEl(1,2))
@@ -435,7 +427,7 @@ c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
 c****      For Tension           
           if (sigma_eff(2)> 0)  then
           
-            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+            term2 = d2_max*((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
           
             C_T_2_b  = (/(term2*sigma_eff(2)*dsdeEl(2,1))
      &   /(F_m*sig_22_f_t**2), (term2*sigma_eff(2)*dsdeEl(2,2))
@@ -444,7 +436,7 @@ c****      For Tension
 c**       For Compression                       
           else                                         
               
-            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+            term2 = d2_max*((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
           
             C_T_2_b  = (/(term2*sigma_eff(2)*dsdeEl(2,1))
      &   /(F_m*sig_22_f_c**2), (term2*sigma_eff(2)*dsdeEl(2,2))

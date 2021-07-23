@@ -51,7 +51,7 @@ c
 	
 	
 
-	if ((ncomp >= 4).AND.(ustatev(2)<0.95)) then
+	if ((ncomp >= 4).AND.(ustatev(2)<0.99)) then
 	
 		
 		call usermat3d (
@@ -401,8 +401,8 @@ c*********   Damage evolution equations    ***********
           
         endif 
         
-        if (d1>=0.95) then
-            d1=0.95
+        if (d1>=0.99) then
+            d1=0.99
         endif
         
         
