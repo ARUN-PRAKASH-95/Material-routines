@@ -1,4 +1,4 @@
-function [sig6,A66,sdvl]=subroutine_strain(eps6,sdvl,ttype)
+function [sig6,A66,sdvl]=subroutine_strain_2(eps6,sdvl,ttype)
 
 
 
@@ -193,16 +193,16 @@ if F_f**2<=1 && F_m**2<=1 && F_z**2<=1
 
     
 else
-    fprintf('yes\n');
+    #fprintf('yes\n');
 
 %%%%%%  Terms in damage evolution equations  %%%%%%%%
     if eps(1) >= 0
 
-      k1 = (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1;
+      k1 = -1;
 
     elseif eps(1) < 0
    
-      k1 = (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1;
+      k1 = -1;
   
     endif
     
@@ -210,11 +210,11 @@ else
     
     if eps(2)+eps(3) >= 0 
   
-      k2 = (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2; 
+      k2 = -1; 
     
     elseif eps(2)+eps(3) < 0
   
-      k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2;
+      k2 =  -1;
   
     endif
 
@@ -222,11 +222,11 @@ else
     
     if eps(3) >= 0
 
-      k3 =  (-sig_33_f_t*eps_33_f_t*L_c)/G_c_3;
+      k3 =  -1;
     
     elseif eps(3) < 0
 
-      k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3;
+      k3 =  -1;
       
     endif   
 
@@ -318,7 +318,7 @@ else
     C_d(6,6) = g_xz*(1 - d3)*(1 - d1);
     C_d;
     
-    if d1 == 0  | d1==1
+    if d1 == 0  
       
       C_T_1 = zeros(6,6);   
       
@@ -366,7 +366,7 @@ else
     
     
 
-    if d2 == 0 | d2==1
+    if d2 == 0 
       
       C_T_2  =  zeros(6,6);
      
@@ -425,7 +425,7 @@ else
     
     
     
-   if d3  == 0| d3==1  
+   if d3  == 0  
      
      C_T_3  =  zeros(6,6);
    
@@ -517,12 +517,12 @@ elseif ttype == 1
         %recursiv call of your material routine with ttype=0 to avoid
         %endless loop
         %Calculate perturbed stress, sdv are not overwritten
-        [sig6per,Adummy,sdvldummy] = subroutine_strain(epsper,sdvl,0);
+        [sig6per,Adummy,sdvldummy] = subroutine_strain_2(epsper,sdvl,0);
         %Simple differential quotient
         A66_num(:,ieps)=(sig6per-sig6)/hper;
         
     end
-    A66=A66_num
+    A66=A66_num;
     
 end
 

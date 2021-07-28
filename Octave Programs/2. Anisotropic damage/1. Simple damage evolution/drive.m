@@ -102,7 +102,7 @@ for n=1:steps
          epsilon(2:6,1) = epsbar;
          
         % 2.) constitutive law: algorithmic stresses and moduli 
-        [s,A,sdvup]=subroutine_strain(epsilon,sdv(:,n),ttype);
+        [s,A,sdvup]=subroutine_strain_2(epsilon,sdv(:,n),ttype);
         %sdv(:,n) = sdvup;
         % 3.) partitioning
         sbar=partition(s);
@@ -141,7 +141,13 @@ fprintf(fileID,'%25s\n','');
 fprintf(fileID,'%3.1f %15.5f %15.5f %15.5f %15.5f\n',data);
 fclose(fileID);
 
+damage = [e11; sdv(1,:); ];
+fileID = fopen('d1_1.txt','w');
+fprintf(fileID,'%25s\n','');
+fprintf(fileID,'%15.5f  %15.5f \n',damage);
+fclose(fileID);
 
+#{
 figure(1)
 %subplot(2,1,1)
 plot(time,e11)
@@ -150,10 +156,10 @@ ylabel('e11')
 
 
 % plot stress-strain response
-figure(2);
+figure(2,'position',[50,50,1000,750]);
  %subplot(2,1,2)
  %plot(e11,s11, paperX,paperY, '-.rx')
-plot(e11,s11,'ob-')
+plot(e11,s11,'b-',"linewidth", 1)
 #legend('\sigma_{11}','Ref.','Location','NorthEast')
 xlabel('\epsilon_{11}')
 ylabel('\sigma_{11} (N/m^2)')
@@ -161,10 +167,10 @@ ylabel('\sigma_{11} (N/m^2)')
 
  
  % plot lateral strains
-figure(3)
-plot(e11,eps22,'ob-')
+figure(3,'position',[50,50,1000,750])
+plot(e11,eps22,'k-',"linewidth", 1)
 hold on
-plot(e11,eps33,'og-')
+plot(e11,eps33,'g--',"linewidth", 1)
 #title('Computed using Algorithmic tangent')
 title('Computed using Numerical Perturbation')
 legend('\epsilon_{22}','\epsilon_{33}','Ref.','Location','SouthEast')
@@ -173,28 +179,28 @@ ylabel('\epsilon_{22},\epsilon_{33}')
 
 
 % plot damage
-figure(4)
-plot(e11,sdv(1,:),'or-')
+figure(4,'position',[50,50,1000,750])
+plot(e11,sdv(1,:),'r-',"linewidth", 1)
 #legend('d1','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d1')
 
-#{
+
 % plot damage
-figure(5)
-plot(e11,sdv(2,:),'or-')
+figure(5,'position',[50,50,1000,750])
+plot(e11,sdv(2,:),'r-',"linewidth", 1)
 #legend('d2','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d2')
 
 % plot damage
-figure(6)
-plot(e11,sdv(3,:),'or-')
+figure(6,'position',[50,50,1000,750])
+plot(e11,sdv(3,:),'r-',"linewidth", 1)
 #legend('d3','Ref.','Location','West')
 xlabel('eps11')
 ylabel('d3')
 
-
+#{
 figure(7)
 plot(e11,sdv(4,:),'r-')
 #legend('F_f','Ref.','Location','West')

@@ -51,7 +51,7 @@ c
 	
 	
 
-	if (ncomp >= 4) then
+	if ((ncomp >= 4).AND.(ustatev(2)<0.99)) then
 	
 		
 		call usermat3d (
@@ -137,10 +137,10 @@ c
       
       integer             i,j,k,l,n,P,ielem,iiter,key
       double precision    young_x, young_y, young_z,  
-     &                    pr_xy, pr_yz, pr_xz, L_c,k1,k2,k3,
-     &                    xK, yield,G_c_1,G_c_2,G_c_3,
-     &                    eps_11_f_t,eps_11_f_c,eps_22_f_t,
-     &                    eps_22_f_c,eps_33_f_t,eps_33_f_c,
+     &                    pr_xy, pr_yz, pr_xz, L_c,k1,k2,k3,d1_max,
+     &                    xK, yield,G_c_1_t,G_c_1_c,G_c_2_t,G_c_2_c,
+     &                    eps_11_f_t,eps_11_f_c,eps_22_f_t,d2_max,
+     &                    eps_22_f_c,eps_33_f_t,eps_33_f_c,d3_max,
      &                    eps_12_f,eps_13_f,eps_23_f,sig_11_f_t,
      &                    sig_22_f_t,sig_33_f_t,d1,d2,d3,d1_new,d2_new
       
@@ -148,7 +148,7 @@ c
      &                    g_xz,delta,pr_yx, pr_zy, pr_zx,xy_yx, yz_zy,
      &                    zx_xz,xyz, E_xyz, sig_11_f_c, sig_22_f_c,
      &                    sig_33_f_c,sig_12_f,sig_23_f,sig_13_f,F_f_new,
-     &                    F_m_new,F_z_new,V,term3
+     &                    F_m_new,F_z_new,V,term3,G_c_3_t,G_c_3_c
 
       
       
@@ -171,24 +171,28 @@ c *** get Young's modulus and Poisson's ratio, initial yield stress and others
 	pr_xy    = prop(4)
 	pr_yz    = prop(5)
 	pr_xz    = prop(6)
-	g_xy     = 5500e6
+	g_xy     = 4200e6
 	g_yz     = 3000e6
-	g_xz     = 5500e6 
+	g_xz     = 4200e6
       
       
-      sig_11_f_t = 2500e6
-      sig_11_f_c = -2000e6
-      sig_22_f_t = 200e6
-      sig_22_f_c = -500e6
+      sig_11_f_t = 910.1e6
+      sig_11_f_c = -710.2e6
+      sig_22_f_t =  300e6 
+      sig_22_f_c = -300e6
       sig_33_f_t = 300e6
-      sig_33_f_c = -500e6
-      sig_12_f   = 50e6
-      sig_13_f   = 50e6
-      sig_23_f   = 50e6
-      G_c_1      = 12.5e5
-      G_c_2      = 1e5
-      G_c_3      = 1e5
+      sig_33_f_c = -300e6
+      sig_12_f   = 131e6
+      sig_13_f   = 131e6
+      sig_23_f   = 131e6
+      G_c_1_t      = 12.5e4
+      G_c_1_c      = 25e4
+      G_c_2_t      = 9.5e4
+      G_c_2_c      = 25.4e4
+      G_c_3_t      = 9.5e4
+      G_c_3_c      = 25.4e4
       L_c        = V**(1.0/3.0)
+    
    
       
 	pr_yx = (young_y * pr_xy) / young_x
@@ -341,30 +345,33 @@ c********    Update stress
           
 c*********  Terms in damage evolution equations   ***********
         if (sigma_eff(1) >= 0) then
-          k1 =   (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1
+          k1 =   (-sig_11_f_t*eps_11_f_t*L_c)/G_c_1_t
         else 
-          k1 =   (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1
+          k1 =   (-sig_11_f_c*eps_11_f_c*L_c)/G_c_1_c
         endif
         
         
         if (sigma_eff(2)  >= 0) then
-          k2 =  (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2
+          k2 =  (-sig_22_f_t*eps_22_f_t*L_c)/G_c_2_t
         else 
-          k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2
+          k2 =  (-sig_22_f_c*eps_22_f_c*L_c)/G_c_2_c
         endif
       
         
         if (sigma_eff(3) >= 0) then
-          k3 =  (-sig_33_f_t*eps_33_f_t*L_c)/G_c_3
+          k3 =  (-sig_33_f_t*eps_33_f_t*L_c)/G_c_3_t
         else 
-          k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3
+          k3 =  (-sig_33_f_c*eps_33_f_c*L_c)/G_c_3_c
         endif
        
-
+        d1_max = 0.999
+        d2_max = 0.999
+        d3_max = 0.999
+        
 c*********   Damage evolution equations    *********** 	  
         if (F_f > 1) then
       
-          d1_new =   ONE  - (exp(k1*(F_f - ONE)))/F_f
+          d1_new = d1_max*(ONE  - (exp(k1*(F_f - ONE)))/F_f)
           
           if (d1_new > d1) then
               d1 = d1_new
@@ -377,7 +384,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_m > 1) then
       
-          d2_new =  ONE  - (exp(k2*(F_m- ONE)))/F_m
+          d2_new =  d2_max*(ONE  - (exp(k2*(F_m- ONE)))/F_m)
           
           if (d2_new > d2) then
               d2 = d2_new
@@ -390,7 +397,7 @@ c*********   Damage evolution equations    ***********
       
         if (F_z > 1) then
       
-          d3_new = ONE  - (exp(k3*(F_z - ONE)))/F_z
+          d3_new = d3_max*(ONE  - (exp(k3*(F_z - ONE)))/F_z)
           
           if (d3_new > d3) then
               d3 = d3_new
@@ -399,6 +406,8 @@ c*********   Damage evolution equations    ***********
           endif      
           
         endif 
+        
+
         
         
 c*****      Inverse of the damage effect tensor  ********
@@ -458,7 +467,7 @@ c**********   Derivative of d1 with respect to strain (d_d1/d_epsilon)   *******
 c**       For Tension          
           if (sigma_eff(1)> 0)  then
               
-            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
+            term1 = d1_max*(((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2))
           
             C_T_1_b  = (/ (term1*dsdeEl(1,1))/sig_11_f_t,
      &      (term1*dsdeEl(1,2))/sig_11_f_t,(term1*dsdeEl(1,3))
@@ -468,7 +477,7 @@ c**       For Tension
 c**       For Compression           
           else
               
-            term1 = ((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2)
+            term1 = d1_max*(((ONE-k1*F_f)*exp(k1*(F_f - ONE)))/(F_f**2))
           
             C_T_1_b  = (/ (term1*dsdeEl(1,1))/sig_11_f_c,
      &      (term1*dsdeEl(1,2))/sig_11_f_c,(term1*dsdeEl(1,3))
@@ -504,7 +513,7 @@ c******     Derivative of d2 with respect to strain (d_d2/d_epsilon)
 c****      For Tension           
           if (sigma_eff(2)> 0)  then
               
-            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+            term2 = d2_max*(((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2))
           
             C_T_2_b  = (/ (term2*dsdeEl(2,1))/sig_22_f_t, 
      &     (term2*dsdeEl(2,2))/sig_22_f_t,(term2*dsdeEl(2,3))
@@ -513,7 +522,7 @@ c****      For Tension
 c**       For Compression                       
           else                                         
               
-            term2 = ((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2)
+            term2 = d2_max*(((ONE-k2*F_m)*exp(k2*(F_m - ONE)))/(F_m**2))
           
             C_T_2_b  = (/ (term2*dsdeEl(2,1))/sig_22_f_c, 
      &     (term2*dsdeEl(2,2))/sig_22_f_c,(term2*dsdeEl(2,3))
@@ -550,7 +559,7 @@ c*****     Derivative of d3 with respect to strain (d_d3/d_epsilon)
 c****     For Tension 
           if (sigma_eff(3) > 0) then
               
-            term3 = ((ONE-k3*F_z)*exp(k3*(F_z - ONE)))/(F_z**2)  
+            term3 = d3_max*(((ONE-k3*F_z)*exp(k3*(F_z - ONE)))/(F_z**2))  
               
             C_T_3_b  = (/ (term3*dsdeEl(3,1))/sig_33_f_t,
      &    (term3*dsdeEl(3,2))/sig_33_f_t,(term3*dsdeEl(3,3))/sig_33_f_t,
@@ -559,7 +568,7 @@ c****     For Tension
 c****     For Compression              
           else 
               
-            term3 = ((ONE-k3*F_z)*exp(k3*(F_z - ONE)))/(F_z**2)  
+            term3 = d3_max*(((ONE-k3*F_z)*exp(k3*(F_z - ONE)))/(F_z**2))  
               
             C_T_3_b  = (/ (term3*dsdeEl(3,1))/sig_33_f_c,
      &    (term3*dsdeEl(3,2))/sig_33_f_c,(term3*dsdeEl(3,3))/sig_33_f_c,

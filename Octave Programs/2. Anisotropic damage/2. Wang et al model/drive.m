@@ -32,7 +32,7 @@ addpath('analyt_sol/');
 ltype=1;
 if ltype==1
     t=[0 10];
-    lam=[0 0.2];
+    lam=[0 0.1];
 elseif ltype==2
     t=[0 5 10];
     lam=[0 1.59155e-3];

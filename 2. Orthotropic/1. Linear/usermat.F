@@ -120,7 +120,7 @@ c
 ********* USER DEFINED VARIABLES (FOR CALCULATION PURPOSE) **********	
 
 
-      DOUBLE PRECISION  dsdeEl(mcomp,mcomp)
+      DOUBLE PRECISION  dsdeEl(mcomp,mcomp), T_strain(mcomp)
 
       
 	DOUBLE PRECISION    var0, var1, var2, var3, var4, var5,
@@ -152,9 +152,9 @@ c
 	pr_xy    = prop(4)
 	pr_yz    = prop(5)
 	pr_xz    = prop(6)
-	g_xy     = 5000000000
-	g_yz     = 3846200000
-	g_xz     = 5000000000
+	g_xy     = 4200e6
+	g_yz     = 3000e6
+	g_xz     = 4200e6
 	
 	pr_yx = (young_y * pr_xy) / young_x
 	pr_zy = (young_z * pr_yz) / young_y
@@ -194,37 +194,37 @@ c
 	dsdeEl(4,1) = 0
 	dsdeEl(4,2) = 0 
 	dsdeEl(4,3) = 0
-	dsdeEl(4,4) = TWO * g_yz
+	dsdeEl(4,4) = g_xy
 	dsdeEl(4,5) = 0
 	dsdeEl(4,6) = 0
 	dsdeEl(5,1) = 0
 	dsdeEl(5,2) = 0 
 	dsdeEl(5,3) = 0
 	dsdeEl(5,4) = 0
-	dsdeEl(5,5) = TWO * g_xz
+	dsdeEl(5,5) = g_yz
 	dsdeEl(5,6) = 0
 	dsdeEl(6,1) = 0
 	dsdeEl(6,2) = 0 
 	dsdeEl(6,3) = 0
 	dsdeEl(6,4) = 0
 	dsdeEl(6,5) = 0
-	dsdeEl(6,6) = TWO * g_xy
+	dsdeEl(6,6) = g_xz
 
 	
       
-****  Calculate the total strain
-
+c *** Calculate current strain
       do i=1,ncomp
-         Strain(i) = Strain(i) + dStrain(i) 
+         T_strain(i) =  Strain(i) + dStrain(i) 
       end do
+
       
-	
+	call vzero(stress,6)
 ***** Calculate the current stress ********	
       
       do i=1,ncomp
          do j=1,ncomp
             dsdePl(i,j) = dsdeEl(i,j)
-            stress(i) = stress(i) + dsdeEl(i,j)*dStrain(j)
+            stress(i) = stress(i) + (dsdeEl(i,j)*T_strain(j))
          end do
 	end do
 	
